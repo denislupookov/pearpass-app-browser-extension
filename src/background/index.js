@@ -68,7 +68,46 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   }
 })
 
+const validateSender = (sender, requiredContext = 'any') => {
+  const extensionUrl = chrome.runtime.getURL('')
+
+  switch (requiredContext) {
+    case 'extension-page':
+      return sender.url?.startsWith(extensionUrl);
+    case 'content-script':
+      return sender.tab?.id !== undefined;
+    case 'any':
+      return true
+    default:
+      return false
+  }
+}
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+
+  const sensitiveTypes = [
+    'SECURE_CHANNEL_GET_IDENTITY',
+    'SECURE_CHANNEL_CONFIRM_PAIR',
+    'readyForPasskeyPayload',
+    'getAssertionCredential'
+  ]
+
+  if (sensitiveTypes.includes(msg.type)) {
+    if (!validateSender(sender, 'extension-page')) {
+      sendResponse({ success: false, error: 'Unauthorized' });
+      return
+    }
+  }
+
+  const contentScriptTypes = ['login', 'getPendingLogin', 'createPasskey', 'getPasskey']
+
+  if (contentScriptTypes.includes(msg.type)) {
+    if (!validateSender(sender, 'content-script')) {
+      sendResponse({ success: false, error: 'Unauthorized' })
+      return
+    }
+  }
+
   if (msg.type === 'login') {
     handleLoginMessage({ msg, sender })
     return
