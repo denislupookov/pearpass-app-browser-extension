@@ -6,6 +6,7 @@ import { ERROR_CODES } from '../shared/constants/nativeMessaging'
 import { arrayBufferToBase64Url } from '../shared/utils/arrayBufferToBase64Url'
 import { base64UrlToArrayBuffer } from '../shared/utils/base64UrlToArrayBuffer'
 import { logger } from '../shared/utils/logger'
+import { validateSender } from './utils/validateSender'
 
 const { SCHEDULE_CLIPBOARD_CLEAR, CLEAR_CLIPBOARD_NOW } = MESSAGES
 const { CLEAR_CLIPBOARD } = ALARMS
@@ -67,21 +68,6 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     }
   }
 })
-
-const validateSender = (sender, requiredContext = 'any') => {
-  const extensionUrl = chrome.runtime.getURL('')
-
-  switch (requiredContext) {
-    case 'extension-page':
-      return sender.url?.startsWith(extensionUrl);
-    case 'content-script':
-      return sender.tab?.id !== undefined;
-    case 'any':
-      return true
-    default:
-      return false
-  }
-}
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
