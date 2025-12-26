@@ -11,7 +11,7 @@ import { logger } from '../shared/utils/logger'
   const nativeCreate = nativeCreds.create.bind(nativeCreds)
   const nativeGet = nativeCreds.get.bind(nativeCreds)
 
-  const generateRequestId = () => `${Date.now()}-${Math.random()}`
+  const generateRequestId = () => `${Date.now()}-${crypto.randomUUID()}`
 
   const awaitMessage = (filterFn) =>
     new Promise((resolve) => {

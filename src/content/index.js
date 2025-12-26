@@ -537,7 +537,7 @@ document.querySelectorAll('input').forEach((input) => {
 // Iframe management
 
 function showIframe(iframeType, { element, data, styles }) {
-  const id = Math.random().toString(36).substring(2, 15)
+  const id = crypto.randomUUID()
 
   const iframe = createIframe({
     styles: styles,
