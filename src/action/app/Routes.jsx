@@ -15,6 +15,7 @@ import { RecordList } from '../pages/RecordList'
 import { SelectPasskey } from '../pages/SelectPasskey'
 import { Settings } from '../pages/Settings'
 import { WelcomePage } from '../pages/WelcomePage'
+import { useInactivity } from '../../hooks/useInactivity'
 
 export const Routes = () => {
   const { currentPage, navigate } = useRouter()
@@ -38,6 +39,8 @@ export const Routes = () => {
       })
     }
   })
+
+  useInactivity()
 
   switch (currentPage) {
     case 'welcome':
