@@ -13,6 +13,7 @@ import {
 } from 'pearpass-lib-constants'
 
 import { version } from '../../../../public/manifest.json'
+import { useAutoLockPreferences } from '../../../hooks/useAutoLockPreferences'
 import { useLanguageOptions } from '../../../hooks/useLanguageOptions'
 import { ButtonRoundIcon } from '../../../shared/components/ButtonRoundIcon'
 import { ButtonSecondary } from '../../../shared/components/ButtonSecondary'
@@ -36,7 +37,6 @@ import {
 } from '../../../shared/utils/autofillSetting'
 import { isPasswordChangeReminderDisabled } from '../../../shared/utils/isPasswordChangeReminderDisabled'
 import { logger } from '../../../shared/utils/logger'
-import { useAutoLockPreferences } from '../../../hooks/useAutoLockPreferences'
 
 export const TIMEOUT_OPTIONS = Object.values(AUTO_LOCK_TIMEOUT_OPTIONS)
 

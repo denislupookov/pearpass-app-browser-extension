@@ -1,6 +1,7 @@
 import { t } from '@lingui/core/macro'
 
 import { useDesktopLogout } from '../../hooks/useDesktopLogout'
+import { useInactivity } from '../../hooks/useInactivity'
 import { FadeInWrapper } from '../../shared/components/FadeInWrapper'
 import { NAVIGATION_ROUTES } from '../../shared/constants/navigation'
 import { useModal } from '../../shared/context/ModalContext'
@@ -15,7 +16,6 @@ import { RecordList } from '../pages/RecordList'
 import { SelectPasskey } from '../pages/SelectPasskey'
 import { Settings } from '../pages/Settings'
 import { WelcomePage } from '../pages/WelcomePage'
-import { useInactivity } from '../../hooks/useInactivity'
 
 export const Routes = () => {
   const { currentPage, navigate } = useRouter()
