@@ -9,9 +9,16 @@ import { SearchIcon } from '../../icons/SearchIcon'
  *  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
  *  quantity?: number
  *  placeholder: string
+ *  inputClassName?: string
  * }} props
  */
-export const InputSearch = ({ value, onChange, quantity, placeholder }) => (
+export const InputSearch = ({
+  value,
+  onChange,
+  quantity,
+  placeholder,
+  inputClassName
+}) => (
   <div className="bg-black-mode1 text-white-mode1 font-inter flex w-full items-center gap-[10px] rounded-[15px] px-[10px] py-[6px] text-base">
     <label className="flex flex-grow-0">
       <SearchIcon />
@@ -20,7 +27,10 @@ export const InputSearch = ({ value, onChange, quantity, placeholder }) => (
       placeholder={placeholder}
       value={value}
       onChange={onChange}
-      className="text-grey200-mode1 flex-1 bg-transparent font-medium outline-none"
+      className={
+        inputClassName ||
+        'text-grey200-mode1 flex-1 bg-transparent font-medium outline-none'
+      }
     />
     <div className="text-white-mode1 flex-grow-0 font-extralight">
       {value?.length ? quantity : null}

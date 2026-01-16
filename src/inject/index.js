@@ -84,6 +84,7 @@ import { logger } from '../shared/utils/logger'
         requestId,
         tabId: options.tabId,
         publicKey,
+        mediation: options.mediation, // Include mediation to detect conditional UI
         requestOrigin: window.location.origin
       },
       '*'

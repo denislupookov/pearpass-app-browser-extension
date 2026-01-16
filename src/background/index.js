@@ -4,6 +4,7 @@ import { secureChannel } from './secureChannel'
 import * as CredentialGenerator from './utils/credentialGenerator'
 import { validateSender } from './utils/validateSender'
 import { ERROR_CODES } from '../shared/constants/nativeMessaging'
+import { passkeyWindowSize } from '../shared/constants/windowSizes'
 import {
   MESSAGE_TYPES,
   SECURE_MESSAGE_TYPES
@@ -16,6 +17,7 @@ const { SCHEDULE_CLIPBOARD_CLEAR, CLEAR_CLIPBOARD_NOW } = MESSAGES
 const { CLEAR_CLIPBOARD } = ALARMS
 
 const pending = new Map()
+const conditionalPasskeyRequests = new Map() // Store conditional UI requests by tabId
 
 // Initialize secure session on startup if already paired
 chrome.runtime.onStartup?.addListener(async () => {
@@ -91,7 +93,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     MESSAGE_TYPES.LOGIN,
     MESSAGE_TYPES.GET_PENDING_LOGIN,
     MESSAGE_TYPES.CREATE_PASSKEY,
-    MESSAGE_TYPES.GET_PASSKEY
+    MESSAGE_TYPES.GET_PASSKEY,
+    MESSAGE_TYPES.GET_CONDITIONAL_PASSKEY_REQUEST,
+    MESSAGE_TYPES.AUTHENTICATE_WITH_PASSKEY
   ]
 
   if (contentScriptTypes.includes(msg.type)) {
@@ -125,6 +129,20 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (msg.type === MESSAGE_TYPES.GET_PASSKEY) {
+    // Check if this is a conditional UI request (passive autofill)
+    if (msg.mediation === 'conditional') {
+      // Store the conditional request so autofill UI can use it
+      conditionalPasskeyRequests.set(sender.tab.id, {
+        requestId: msg.requestId,
+        publicKey: msg.publicKey,
+        requestOrigin: msg.requestOrigin,
+        timestamp: Date.now()
+      })
+      logger.log('Stored conditional UI passkey request for autofill')
+
+      return false
+    }
+
     const queryParams = new URLSearchParams({
       requestId: msg.requestId,
       tabId: sender.tab.id,
@@ -134,6 +152,41 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     })
 
     openPasskeyWindow(queryParams)
+    return true
+  }
+
+  if (msg.type === MESSAGE_TYPES.GET_CONDITIONAL_PASSKEY_REQUEST) {
+    const request = conditionalPasskeyRequests.get(sender.tab.id) || null
+    sendResponse({ request, tabId: sender.tab.id })
+    return true
+  }
+
+  if (msg.type === MESSAGE_TYPES.AUTHENTICATE_WITH_PASSKEY) {
+    // Handle autofill passkey authentication
+    const { credential, tabId } = msg
+    const request = conditionalPasskeyRequests.get(tabId)
+
+    if (!request) {
+      logger.error('No conditional passkey request found for tab', tabId)
+      return
+    }
+
+    // Generate assertion credential and send to content script
+    void getAssertionCredential(
+      request.requestOrigin,
+      JSON.stringify(request.publicKey),
+      credential
+    ).then((assertionCredential) => {
+      chrome.tabs.sendMessage(parseInt(tabId), {
+        type: 'gotPasskey',
+        requestId: request.requestId,
+        credential: assertionCredential
+      })
+
+      // Clean up the stored request
+      conditionalPasskeyRequests.delete(tabId)
+    })
+
     return true
   }
 
@@ -389,8 +442,8 @@ const openPasskeyWindow = (queryParams = new URLSearchParams()) => {
 
   chrome.windows.create({
     focused: true,
-    height: 600,
-    width: 400,
+    height: passkeyWindowSize.height,
+    width: passkeyWindowSize.width,
     url: chrome.runtime.getURL(`index.html#/${page}?${queryParams.toString()}`),
     type: 'popup'
   })
@@ -412,7 +465,7 @@ const getAssertionCredential = async (
   savedCredential
 ) => {
   const publicKey = JSON.parse(serializedPublicKey)
-  const { challenge: challengeB64, rpId } = publicKey
+  const { challenge: challengeB64, rpId, userVerification } = publicKey
 
   // Rebuild the clientDataJSON for "webauthn.get"
   const clientDataJSON = CredentialGenerator.rebuildClientDataJSON(
@@ -421,16 +474,13 @@ const getAssertionCredential = async (
     'webauthn.get'
   )
 
-  // Decode the credential ID back into bytes
-  const credIdBytes = base64UrlToArrayBuffer(savedCredential.rawId)
-
-  // Build the authenticator data blob
+  // Build the authenticator data blob for assertion (simple 37-byte format)
   const authData = await CredentialGenerator.buildAuthenticatorData(
     rpId,
-    credIdBytes,
-    await CredentialGenerator.importPublicKeyFromPem(
-      savedCredential.response.publicKey
-    )
+    null, // credentialId not needed for assertions
+    null, // publicKey not needed for assertions
+    true, // isAssertion = true
+    userVerification || 'preferred' // Pass userVerification from request
   )
 
   // Sign the assertion over authenticatorData and clientDataJSON
@@ -448,6 +498,7 @@ const getAssertionCredential = async (
     false, // non-extractable for extra safety
     ['sign']
   )
+
   const signature = await CredentialGenerator.signAssertion(
     privateKeyFromBuffer,
     authData.buffer,
@@ -473,3 +524,20 @@ const getAssertionCredential = async (
     clientExtensionResults: savedCredential.clientExtensionResults
   }
 }
+
+// Clean up conditional passkey requests when tabs close or navigate
+chrome.tabs.onRemoved.addListener((tabId) => {
+  if (conditionalPasskeyRequests.has(tabId)) {
+    conditionalPasskeyRequests.delete(tabId)
+    logger.log(`Cleaned up conditional passkey request for closed tab ${tabId}`)
+  }
+})
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (changeInfo.url && conditionalPasskeyRequests.has(tabId)) {
+    conditionalPasskeyRequests.delete(tabId)
+    logger.log(
+      `Cleaned up conditional passkey request for tab ${tabId} navigation`
+    )
+  }
+})

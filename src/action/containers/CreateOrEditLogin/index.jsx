@@ -14,6 +14,8 @@ import { InputFieldPassword } from '../../../shared/components/InputFieldPasswor
 import { PasswordGeneratorModalContent } from '../../../shared/containers/PasswordGeneratorModalContent'
 import { useGlobalLoading } from '../../../shared/context/LoadingContext'
 import { useModal } from '../../../shared/context/ModalContext'
+import { useRouter } from '../../../shared/context/RouterContext'
+import { useIsPasskeyPopup } from '../../../shared/hooks/useIsPasskeyPopup'
 import { CommonFileIcon } from '../../../shared/icons/CommonFileIcon'
 import { DeleteIcon } from '../../../shared/icons/DeleteIcon'
 import { KeyIcon } from '../../../shared/icons/KeyIcon'
@@ -33,6 +35,8 @@ export const CreateOrEditLogin = ({
   onClose
 }) => {
   const { setModal, closeModal } = useModal()
+  const { state: routerState } = useRouter()
+  const isPasskeyPopup = useIsPasskeyPopup()
 
   const schema = Validator.object({
     title: Validator.string().required(t`Title is required`),
@@ -67,13 +71,19 @@ export const CreateOrEditLogin = ({
 
   const { register, handleSubmit, registerArray, setValue, values } = useForm({
     initialValues: {
-      title: initialRecord?.data?.title ?? '',
-      username: initialRecord?.data?.username ?? '',
+      title:
+        routerState?.initialData?.title || initialRecord?.data?.title || '',
+      username:
+        routerState?.initialData?.username ||
+        initialRecord?.data?.username ||
+        '',
       password: initialRecord?.data?.password ?? '',
       note: initialRecord?.data?.note ?? '',
-      websites: initialRecord?.data?.websites?.length
-        ? initialRecord.data.websites.map((website) => ({ website }))
-        : [{ name: 'website' }],
+      websites: routerState?.initialData?.websites?.length
+        ? routerState.initialData.websites.map((website) => ({ website }))
+        : initialRecord?.data?.websites?.length
+          ? initialRecord.data.websites.map((website) => ({ website }))
+          : [{ name: 'website' }],
       customFields: initialRecord?.data?.customFields ?? [],
       folder: selectedFolder ?? initialRecord?.folder
     },
@@ -95,6 +105,8 @@ export const CreateOrEditLogin = ({
   } = registerArray('customFields')
 
   const onSubmit = (values) => {
+    const passkeyCredential = routerState?.passkeyCredential
+
     const data = {
       type: RECORD_TYPES.LOGIN,
       folder: values.folder,
@@ -103,7 +115,7 @@ export const CreateOrEditLogin = ({
         title: values.title,
         username: values.username,
         password: values.password,
-        credential: initialRecord?.data?.credential,
+        credential: passkeyCredential || initialRecord?.data?.credential,
         note: values.note,
         websites: values.websites
           .filter((website) => !!website?.website?.trim().length)
@@ -133,7 +145,9 @@ export const CreateOrEditLogin = ({
         isSaveDisabled={isLoading}
       />
 
-      <div className="flex w-full flex-col gap-4 overflow-auto">
+      <div
+        className={`flex w-full flex-col gap-4 overflow-auto ${isPasskeyPopup ? 'pb-5' : ''}`}
+      >
         <FormGroup>
           <InputField
             label={t`Title`}
