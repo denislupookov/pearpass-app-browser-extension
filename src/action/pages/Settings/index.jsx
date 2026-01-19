@@ -9,7 +9,8 @@ import {
 import {
   AUTO_LOCK_TIMEOUT_OPTIONS,
   PRIVACY_POLICY,
-  TERMS_OF_USE
+  TERMS_OF_USE,
+  AUTO_LOCK_ENABLED
 } from 'pearpass-lib-constants'
 
 import { version } from '../../../../public/manifest.json'
@@ -187,23 +188,24 @@ export const Settings = () => {
               description={t`When clicking a password you copy that into your clipboard`}
               onChange={handleCopyToClipboardSettingChange}
             />
-
-            <div className="flex flex-col gap-0.5">
-              <SwitchWithLabel
-                isOn={isAutoLockEnabled}
-                label={t`Auto Log-out`}
-                description={t`Automatically logs you out after you stop interacting with the app, based on the timeout you select.`}
-                onChange={setAutoLockEnabled}
-              />
-              {isAutoLockEnabled && (
-                <Select
-                  items={translatedOptions}
-                  selectedItem={selectedTimeoutOption}
-                  onItemSelect={(option) => setTimeoutMs(option.value)}
-                  placeholder={t`Select`}
+            {AUTO_LOCK_ENABLED && (
+              <div className="flex flex-col gap-0.5">
+                <SwitchWithLabel
+                  isOn={isAutoLockEnabled}
+                  label={t`Auto Log-out`}
+                  description={t`Automatically logs you out after you stop interacting with the app, based on the timeout you select.`}
+                  onChange={setAutoLockEnabled}
                 />
-              )}
-            </div>
+                {isAutoLockEnabled && (
+                  <Select
+                    items={translatedOptions}
+                    selectedItem={selectedTimeoutOption}
+                    onItemSelect={(option) => setTimeoutMs(option.value)}
+                    placeholder={t`Select`}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </CardSingleSetting>
 
