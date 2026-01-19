@@ -48,7 +48,7 @@ function rawToDer(raw) {
   // Build SEQUENCE: 0x30 [length] [rDer] [sDer]
   const derLength = rDer.length + sDer.length
   const der = new Uint8Array(2 + derLength)
-  der[0] = 0x30 // SEQUENCE tag
+  der[0] = 0x30
   der[1] = derLength
   der.set(rDer, 2)
   der.set(sDer, 2 + rDer.length)
@@ -74,7 +74,7 @@ function encodeInteger(bytes) {
   const length = trimmed.length + (needsPadding ? 1 : 0)
 
   const result = new Uint8Array(2 + length)
-  result[0] = 0x02 // INTEGER tag
+  result[0] = 0x02
   result[1] = length
   if (needsPadding) {
     result[2] = 0x00

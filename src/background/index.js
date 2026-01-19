@@ -496,10 +496,10 @@ const getAssertionCredential = async (
   // Build the authenticator data blob for assertion (simple 37-byte format)
   const authData = await CredentialGenerator.buildAuthenticatorData(
     rpId,
-    null, // credentialId not needed for assertions
-    null, // publicKey not needed for assertions
-    true, // isAssertion = true
-    userVerification || 'preferred' // Pass userVerification from request
+    null,
+    null,
+    true,
+    userVerification || 'preferred'
   )
 
   // Sign the assertion over authenticatorData and clientDataJSON
@@ -524,6 +524,7 @@ const getAssertionCredential = async (
     clientDataJSON
   )
 
+  // Build the final credential response
   const response = {
     clientDataJSON: arrayBufferToBase64Url(clientDataJSON),
     attestationObject: savedCredential.response.attestationObject,
@@ -537,6 +538,7 @@ const getAssertionCredential = async (
     rawId: savedCredential.rawId,
     type: 'public-key',
     response,
+    // Match the authenticatorAttachment & transports with the saved credential
     authenticatorAttachment: savedCredential.authenticatorAttachment,
     clientExtensionResults: savedCredential.clientExtensionResults
   }

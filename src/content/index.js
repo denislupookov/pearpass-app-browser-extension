@@ -618,7 +618,7 @@ function handleWindowEvent(event) {
       type: 'getPasskey',
       requestId: data.requestId,
       publicKey: data.publicKey,
-      mediation: data.mediation, // Forward mediation parameter
+      mediation: data.mediation,
       requestOrigin: data.requestOrigin
     })
   }

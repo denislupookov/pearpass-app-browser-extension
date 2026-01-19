@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { t } from '@lingui/core/macro'
 import { RECORD_TYPES, useRecords } from 'pearpass-lib-vault'
 
+import { sanitizeCredentialForPage } from './utils/sanitizeCredentialForPage'
 import { ReplacePasskeyModalContent } from '../../../shared/containers/ReplacePasskeyModalContent'
 import { useModal } from '../../../shared/context/ModalContext'
 import { useRouter } from '../../../shared/context/RouterContext'
@@ -33,7 +34,7 @@ export const CreatePasskey = () => {
         type: 'savedPasskey',
         requestId,
         recordId: record.id,
-        credential
+        credential: sanitizeCredentialForPage(credential)
       })
 
       navigate('createOrEditCategory', {
@@ -69,7 +70,7 @@ export const CreatePasskey = () => {
           type: 'savedPasskey',
           requestId,
           recordId: null,
-          credential
+          credential: sanitizeCredentialForPage(credential)
         })
 
         navigate('createOrEditCategory', {

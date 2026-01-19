@@ -166,12 +166,20 @@ import { logger } from '../shared/utils/logger'
           return credentialJson.response.transports
         }
       },
-      toJSON: () => credentialJson,
+      toJSON: () => ({
+        id: credentialJson.id,
+        rawId: credentialJson.rawId,
+        type: credentialJson.type,
+        response: credentialJson.response,
+        authenticatorAttachment: credentialJson.authenticatorAttachment,
+        clientExtensionResults: credentialJson.clientExtensionResults
+      }),
       getClientExtensionResults: () => ({
-        credProps: credentialJson.clientExtensionResults.credProps
+        credProps: credentialJson.clientExtensionResults?.credProps
       })
     }
 
+    // Manually set prototypes to make custom PublicKeyCredential indistinguishable from the native class.
     if (credentialJson.response.attestationObject) {
       // For registration
       Object.setPrototypeOf(
