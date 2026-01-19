@@ -30,6 +30,7 @@ import { normalizeUrl } from '../../../shared/utils/normalizeUrl'
  *   selectedRecord: object | null,
  *   onRecordSelect: (record: object) => void,
  *   onHardwareKeyClick: () => void,
+ *   onVaultChange?: () => void,
  *   children: React.ReactNode // Footer buttons
  * }} props
  */
@@ -41,6 +42,7 @@ export const PasskeyContainer = ({
   selectedRecord,
   onRecordSelect,
   onHardwareKeyClick,
+  onVaultChange,
   children
 }) => {
   const { refetch: refetchVault, data: vaultData } = useVault()
@@ -66,6 +68,7 @@ export const PasskeyContainer = ({
     try {
       await refetchVault(vault.id)
       setIsVaultDropdownOpen(false)
+      onVaultChange?.()
     } catch (error) {
       logger.error('Failed to switch vault:', error)
     } finally {

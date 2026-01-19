@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 
 import { RECORD_TYPES, useRecordById } from 'pearpass-lib-vault'
 
+import { sanitizeCredentialForPage } from './utils/sanitizeCredentialForPage'
 import { CreateOrEditCreditCard } from '../../../action/containers/CreateOrEditCreditCard'
 import { CreateOrEditCustom } from '../../../action/containers/CreateOrEditCustom'
 import { CreateOrEditIdentity } from '../../../action/containers/CreateOrEditIdentity'
@@ -25,8 +26,16 @@ export const CreateOrEditCategory = () => {
     const recordType = params?.recordType ?? initialRecord?.type
     const selectedFolder = params?.selectedFolder ?? initialRecord?.folder
 
-    const onSave = () => {
+    const onSave = (savedRecordId) => {
       if (isPasskeyPopup) {
+        if (routerState?.passkeyCredential && routerState?.tabId) {
+          chrome.tabs.sendMessage(parseInt(routerState.tabId), {
+            type: 'savedPasskey',
+            requestId: routerState.requestId,
+            recordId: savedRecordId || null,
+            credential: sanitizeCredentialForPage(routerState.passkeyCredential)
+          })
+        }
         window.close()
       } else {
         navigate('vault', {

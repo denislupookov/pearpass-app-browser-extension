@@ -57,11 +57,11 @@ export const CreateOrEditLogin = ({
   })
 
   const { createRecord, isLoading: isCreateLoading } = useCreateRecord({
-    onCompleted: onSave
+    onCompleted: (payload) => onSave(payload?.record?.id)
   })
 
   const { updateRecords, isLoading: isUpdateLoading } = useRecords({
-    onCompleted: onSave,
+    onCompleted: () => onSave(initialRecord?.id),
     variables: undefined
   })
 
@@ -194,7 +194,8 @@ export const CreateOrEditLogin = ({
             }
             {...register('password')}
           />
-          {!!initialRecord?.data?.credential && (
+          {(!!initialRecord?.data?.credential ||
+            !!routerState?.passkeyCredential) && (
             <InputField
               label={t`Passkey`}
               placeholder={t`Passkey Stored`}

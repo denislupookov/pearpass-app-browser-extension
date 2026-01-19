@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { getIconProps } from '../../../shared/utils/getIconProps'
 
 /**

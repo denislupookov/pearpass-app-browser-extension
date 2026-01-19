@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react'
 import { t } from '@lingui/core/macro'
 import { RECORD_TYPES, useRecords } from 'pearpass-lib-vault'
 
-import { sanitizeCredentialForPage } from './utils/sanitizeCredentialForPage'
 import { ReplacePasskeyModalContent } from '../../../shared/containers/ReplacePasskeyModalContent'
 import { useModal } from '../../../shared/context/ModalContext'
 import { useRouter } from '../../../shared/context/RouterContext'
@@ -29,13 +28,6 @@ export const CreatePasskey = () => {
       })
 
       const { credential } = response
-
-      chrome.tabs.sendMessage(parseInt(tabId), {
-        type: 'savedPasskey',
-        requestId,
-        recordId: record.id,
-        credential: sanitizeCredentialForPage(credential)
-      })
 
       navigate('createOrEditCategory', {
         params: { recordId: record.id },
@@ -66,13 +58,6 @@ export const CreatePasskey = () => {
       .then((response) => {
         const { credential, publicKey } = response
 
-        chrome.tabs.sendMessage(parseInt(tabId), {
-          type: 'savedPasskey',
-          requestId,
-          recordId: null,
-          credential: sanitizeCredentialForPage(credential)
-        })
-
         navigate('createOrEditCategory', {
           params: { recordType: RECORD_TYPES.LOGIN },
           state: {
@@ -92,11 +77,6 @@ export const CreatePasskey = () => {
       })
       .catch((error) => {
         logger.error('Failed to create passkey:', error?.message || error)
-        chrome.tabs.sendMessage(parseInt(tabId), {
-          type: 'savedPasskey',
-          requestId: requestId,
-          recordId: null
-        })
       })
   }
 
@@ -176,6 +156,7 @@ export const CreatePasskey = () => {
       records={recordsFiltered}
       onRecordSelect={handleRecordSelect}
       onHardwareKeyClick={handleGetHardwarePasskey}
+      onVaultChange={() => setSelectedRecord(null)}
     >
       <div className="flex gap-[40px] pt-[20px] pb-[20px]">
         <button
