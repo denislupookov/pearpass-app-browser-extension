@@ -58,11 +58,11 @@ import { logger } from '../shared/utils/logger'
         data?.requestId === requestId
     )
 
-    const { recordId, credential, type } = await responsePromise
+    const { credential, type } = await responsePromise
 
     if (type === 'createThirdPartyKey') {
       return await nativeCreate(options)
-    } else if (!recordId || !credential) {
+    } else if (!credential) {
       logger.error('Could not create pass key')
       return null
     } else {
