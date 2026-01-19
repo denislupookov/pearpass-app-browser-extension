@@ -3,7 +3,9 @@ import { useMemo } from 'react'
 import { t } from '@lingui/core/macro'
 import { RECORD_TYPES, useRecords } from 'pearpass-lib-vault'
 
+import { CONTENT_MESSAGE_TYPES } from '../../../shared/constants/nativeMessaging'
 import { useRouter } from '../../../shared/context/RouterContext'
+import { MESSAGE_TYPES } from '../../../shared/services/messageBridge'
 import { logger } from '../../../shared/utils/logger'
 import { PasskeyContainer } from '../../containers/PasskeyContainer'
 
@@ -16,14 +18,14 @@ export const SelectPasskey = () => {
   const handleRecordSelect = (record) => {
     chrome.runtime
       .sendMessage({
-        type: 'getAssertionCredential',
+        type: MESSAGE_TYPES.GET_ASSERTION_CREDENTIAL,
         serializedPublicKey,
         credential: record.data.credential,
         requestOrigin
       })
       .then((response) => {
         chrome.tabs.sendMessage(parseInt(tabId), {
-          type: 'gotPasskey',
+          type: CONTENT_MESSAGE_TYPES.GOT_PASSKEY,
           requestId,
           credential: response.assertionCredential
         })
@@ -34,7 +36,7 @@ export const SelectPasskey = () => {
           error?.message || error
         )
         chrome.tabs.sendMessage(parseInt(tabId), {
-          type: 'gotPasskey',
+          type: CONTENT_MESSAGE_TYPES.GOT_PASSKEY,
           requestId,
           credential: null
         })
@@ -46,7 +48,7 @@ export const SelectPasskey = () => {
 
   const handleCancel = () => {
     chrome.tabs.sendMessage(parseInt(tabId), {
-      type: 'gotPasskey',
+      type: CONTENT_MESSAGE_TYPES.GOT_PASSKEY,
       requestId,
       credential: null
     })
@@ -56,7 +58,7 @@ export const SelectPasskey = () => {
   const handleGetHardwarePasskey = () => {
     chrome.tabs
       .sendMessage(parseInt(tabId), {
-        type: 'getThirdPartyKey',
+        type: CONTENT_MESSAGE_TYPES.GET_THIRD_PARTY_KEY,
         requestId
       })
       .finally(() => {

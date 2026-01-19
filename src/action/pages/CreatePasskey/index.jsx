@@ -3,10 +3,12 @@ import { useMemo, useState } from 'react'
 import { t } from '@lingui/core/macro'
 import { RECORD_TYPES, useRecords } from 'pearpass-lib-vault'
 
+import { CONTENT_MESSAGE_TYPES } from '../../../shared/constants/nativeMessaging'
 import { ReplacePasskeyModalContent } from '../../../shared/containers/ReplacePasskeyModalContent'
 import { useModal } from '../../../shared/context/ModalContext'
 import { useRouter } from '../../../shared/context/RouterContext'
 import { PlusIcon } from '../../../shared/icons/PlusIcon'
+import { MESSAGE_TYPES } from '../../../shared/services/messageBridge'
 import { logger } from '../../../shared/utils/logger'
 import { normalizeUrl } from '../../../shared/utils/normalizeUrl'
 import { PasskeyContainer } from '../../containers/PasskeyContainer'
@@ -22,7 +24,7 @@ export const CreatePasskey = () => {
   const saveToExistingRecord = async (record) => {
     try {
       const response = await chrome.runtime.sendMessage({
-        type: 'readyForPasskeyPayload',
+        type: MESSAGE_TYPES.READY_FOR_PASSKEY_PAYLOAD,
         requestOrigin,
         serializedPublicKey
       })
@@ -51,7 +53,7 @@ export const CreatePasskey = () => {
   const handleCreateNewLogin = () => {
     chrome.runtime
       .sendMessage({
-        type: 'readyForPasskeyPayload',
+        type: MESSAGE_TYPES.READY_FOR_PASSKEY_PAYLOAD,
         requestOrigin,
         serializedPublicKey
       })
@@ -87,7 +89,7 @@ export const CreatePasskey = () => {
   const handleCancel = () => {
     chrome.tabs
       .sendMessage(parseInt(tabId), {
-        type: 'savedPasskey',
+        type: CONTENT_MESSAGE_TYPES.SAVED_PASSKEY,
         requestId: requestId,
         recordId: null
       })
@@ -99,7 +101,7 @@ export const CreatePasskey = () => {
   const handleGetHardwarePasskey = () => {
     chrome.tabs
       .sendMessage(parseInt(tabId), {
-        type: 'createThirdPartyKey',
+        type: CONTENT_MESSAGE_TYPES.CREATE_THIRD_PARTY_KEY,
         requestId
       })
       .finally(() => {

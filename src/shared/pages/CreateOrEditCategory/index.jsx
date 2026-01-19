@@ -10,6 +10,7 @@ import { CreateOrEditLogin } from '../../../action/containers/CreateOrEditLogin'
 import { CreateOrEditNote } from '../../../action/containers/CreateOrEditNote'
 import { CreateOrEditPassPhrase } from '../../../action/containers/CreateOrEditPassPhrase'
 import { CreateOrEditWifi } from '../../../action/containers/CreateOrEditWifi'
+import { CONTENT_MESSAGE_TYPES } from '../../constants/nativeMessaging'
 import { useRouter } from '../../context/RouterContext'
 import { useIsPasskeyPopup } from '../../hooks/useIsPasskeyPopup'
 
@@ -30,7 +31,7 @@ export const CreateOrEditCategory = () => {
       if (isPasskeyPopup) {
         if (routerState?.passkeyCredential && routerState?.tabId) {
           chrome.tabs.sendMessage(parseInt(routerState.tabId), {
-            type: 'savedPasskey',
+            type: CONTENT_MESSAGE_TYPES.SAVED_PASSKEY,
             requestId: routerState.requestId,
             recordId: savedRecordId || null,
             credential: sanitizeCredentialForPage(routerState.passkeyCredential)

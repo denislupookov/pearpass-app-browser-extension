@@ -3,7 +3,10 @@ import { MESSAGES, ALARMS } from './constants'
 import { secureChannel } from './secureChannel'
 import * as CredentialGenerator from './utils/credentialGenerator'
 import { validateSender } from './utils/validateSender'
-import { ERROR_CODES } from '../shared/constants/nativeMessaging'
+import {
+  ERROR_CODES,
+  CONTENT_MESSAGE_TYPES
+} from '../shared/constants/nativeMessaging'
 import { passkeyWindowSize } from '../shared/constants/windowSizes'
 import {
   MESSAGE_TYPES,
@@ -178,7 +181,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     )
       .then((assertionCredential) => {
         chrome.tabs.sendMessage(parseInt(tabId), {
-          type: 'gotPasskey',
+          type: CONTENT_MESSAGE_TYPES.GOT_PASSKEY,
           requestId: request.requestId,
           credential: assertionCredential
         })
