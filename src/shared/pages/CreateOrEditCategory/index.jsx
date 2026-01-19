@@ -13,7 +13,7 @@ import { useRouter } from '../../context/RouterContext'
 import { useIsPasskeyPopup } from '../../hooks/useIsPasskeyPopup'
 
 export const CreateOrEditCategory = () => {
-  const { params, navigate } = useRouter()
+  const { params, state: routerState, navigate } = useRouter()
 
   const isPasskeyPopup = useIsPasskeyPopup()
 
@@ -38,7 +38,14 @@ export const CreateOrEditCategory = () => {
 
     const onClose = () => {
       if (isPasskeyPopup) {
-        window.close()
+        navigate('createPasskey', {
+          state: {
+            serializedPublicKey: routerState?.serializedPublicKey,
+            requestId: routerState?.requestId,
+            requestOrigin: routerState?.requestOrigin,
+            tabId: routerState?.tabId
+          }
+        })
       } else if (initialRecord && Object.keys(initialRecord).length > 0) {
         navigate('recordDetails', {
           params: { recordId: initialRecord.id },
@@ -56,7 +63,7 @@ export const CreateOrEditCategory = () => {
       commonProps: { initialRecord, selectedFolder, onSave, onClose },
       recordType
     }
-  }, [params, initialRecord, isPasskeyPopup, navigate])
+  }, [params, initialRecord, isPasskeyPopup, navigate, routerState])
 
   return (
     <div className="bg-grey500-mode1 flex h-full w-full flex-col items-start gap-3.5 rounded-lg p-5">

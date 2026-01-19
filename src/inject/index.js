@@ -84,7 +84,7 @@ import { logger } from '../shared/utils/logger'
         requestId,
         tabId: options.tabId,
         publicKey,
-        mediation: options.mediation, // Include mediation to detect conditional UI
+        mediation: options.mediation,
         requestOrigin: window.location.origin
       },
       '*'
@@ -172,7 +172,6 @@ import { logger } from '../shared/utils/logger'
       })
     }
 
-    // Manually set prototypes to make custom PublicKeyCredential indistinguishable from the native class.
     if (credentialJson.response.attestationObject) {
       // For registration
       Object.setPrototypeOf(

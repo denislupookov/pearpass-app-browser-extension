@@ -17,7 +17,7 @@ const { SCHEDULE_CLIPBOARD_CLEAR, CLEAR_CLIPBOARD_NOW } = MESSAGES
 const { CLEAR_CLIPBOARD } = ALARMS
 
 const pending = new Map()
-const conditionalPasskeyRequests = new Map() // Store conditional UI requests by tabId
+const conditionalPasskeyRequests = new Map()
 
 // Initialize secure session on startup if already paired
 chrome.runtime.onStartup?.addListener(async () => {
@@ -162,30 +162,35 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (msg.type === MESSAGE_TYPES.AUTHENTICATE_WITH_PASSKEY) {
-    // Handle autofill passkey authentication
     const { credential, tabId } = msg
     const request = conditionalPasskeyRequests.get(tabId)
 
     if (!request) {
       logger.error('No conditional passkey request found for tab', tabId)
-      return
+      sendResponse({ success: false, error: 'No request found' })
+      return true
     }
 
-    // Generate assertion credential and send to content script
     void getAssertionCredential(
       request.requestOrigin,
       JSON.stringify(request.publicKey),
       credential
-    ).then((assertionCredential) => {
-      chrome.tabs.sendMessage(parseInt(tabId), {
-        type: 'gotPasskey',
-        requestId: request.requestId,
-        credential: assertionCredential
-      })
+    )
+      .then((assertionCredential) => {
+        chrome.tabs.sendMessage(parseInt(tabId), {
+          type: 'gotPasskey',
+          requestId: request.requestId,
+          credential: assertionCredential
+        })
 
-      // Clean up the stored request
-      conditionalPasskeyRequests.delete(tabId)
-    })
+        conditionalPasskeyRequests.delete(tabId)
+
+        sendResponse({ success: true, credential: assertionCredential })
+      })
+      .catch((error) => {
+        logger.error('Failed to get assertion credential:', error)
+        sendResponse({ success: false, error: error.message })
+      })
 
     return true
   }
@@ -208,16 +213,21 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       serializedPublicKey,
       credential: savedCredential
     } = msg
-    void getAssertionCredential(
-      requestOrigin,
-      serializedPublicKey,
-      savedCredential
-    ).then((assertionCredential) => {
-      sendResponse({
-        type: 'assertionCredential',
-        assertionCredential
+
+    getAssertionCredential(requestOrigin, serializedPublicKey, savedCredential)
+      .then((assertionCredential) => {
+        sendResponse({
+          success: true,
+          assertionCredential
+        })
       })
-    })
+      .catch((error) => {
+        logger.error('Failed to get assertion credential:', error)
+        sendResponse({
+          success: false,
+          error: error?.message || 'Failed to get assertion credential'
+        })
+      })
 
     return true
   }
@@ -254,7 +264,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const handshake = await secureChannel.beginHandshake()
         if (!handshake.ok) {
           sendResponse({
-            ok: false,
+            success: false,
             error: handshake.error || 'HandshakeFailed',
             code: ERROR_CODES.HANDSHAKE_FAILED
           })
@@ -263,16 +273,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const finish = await secureChannel.finishHandshake()
         if (!finish?.ok) {
           sendResponse({
-            ok: false,
+            success: false,
             error: finish?.error || 'HandshakeFinishFailed',
             code: ERROR_CODES.HANDSHAKE_FAILED
           })
           return
         }
-        sendResponse({ ok: true, sessionId: handshake.sessionId })
+        sendResponse({ success: true, sessionId: handshake.sessionId })
       } catch (e) {
         sendResponse({
-          ok: false,
+          success: false,
           error: e?.message,
           code: ERROR_CODES.UNKNOWN
         })
@@ -285,9 +295,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     ;(async () => {
       try {
         const paired = await secureChannel.isPaired()
-        sendResponse({ paired })
+        sendResponse({ success: true, paired })
       } catch (e) {
         sendResponse({
+          success: false,
           paired: false,
           error: e?.message,
           code: ERROR_CODES.UNKNOWN
@@ -309,7 +320,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       await chrome.alarms.clear(CLEAR_CLIPBOARD)
       const when = Date.now() + msg.delayMs
       await chrome.alarms.create(CLEAR_CLIPBOARD, { when })
-      sendResponse({ ok: true })
+      sendResponse({ success: true })
     })()
     return true
   }
@@ -390,17 +401,25 @@ const sendPasskeyPayload = async (
   serializedPublicKey,
   sendResponse
 ) => {
-  const publicKey = JSON.parse(serializedPublicKey)
-  const credential = await createRegistrationCredential(
-    publicKey,
-    requestOrigin
-  )
+  try {
+    const publicKey = JSON.parse(serializedPublicKey)
+    const credential = await createRegistrationCredential(
+      publicKey,
+      requestOrigin
+    )
 
-  sendResponse({
-    type: 'passkeyPayload',
-    credential,
-    publicKey
-  })
+    sendResponse({
+      success: true,
+      credential,
+      publicKey
+    })
+  } catch (error) {
+    logger.error('Failed to create passkey payload:', error)
+    sendResponse({
+      success: false,
+      error: error?.message || 'Failed to create passkey'
+    })
+  }
 }
 
 const handleLoginMessage = ({ msg, sender }) => {
@@ -409,12 +428,12 @@ const handleLoginMessage = ({ msg, sender }) => {
       ...pending.get(sender.tab.id),
       password: msg.data.password
     })
+  } else {
+    pending.set(sender.tab.id, msg.data)
   }
 
-  pending.set(sender.tab.id, msg.data)
-
   setTimeout(() => {
-    clearPending(msg.tabId)
+    clearPending(sender.tab.id)
   }, 1000 * 30)
 }
 
@@ -495,7 +514,7 @@ const getAssertionCredential = async (
       name: 'ECDSA',
       namedCurve: 'P-256'
     },
-    false, // non-extractable for extra safety
+    false,
     ['sign']
   )
 
@@ -505,7 +524,6 @@ const getAssertionCredential = async (
     clientDataJSON
   )
 
-  // Build the final credential response
   const response = {
     clientDataJSON: arrayBufferToBase64Url(clientDataJSON),
     attestationObject: savedCredential.response.attestationObject,
@@ -519,13 +537,11 @@ const getAssertionCredential = async (
     rawId: savedCredential.rawId,
     type: 'public-key',
     response,
-    // Match the authenticatorAttachment & transports with the saved credential
     authenticatorAttachment: savedCredential.authenticatorAttachment,
     clientExtensionResults: savedCredential.clientExtensionResults
   }
 }
 
-// Clean up conditional passkey requests when tabs close or navigate
 chrome.tabs.onRemoved.addListener((tabId) => {
   if (conditionalPasskeyRequests.has(tabId)) {
     conditionalPasskeyRequests.delete(tabId)
