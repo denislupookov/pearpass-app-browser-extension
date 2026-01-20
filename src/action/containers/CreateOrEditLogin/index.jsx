@@ -83,7 +83,7 @@ export const CreateOrEditLogin = ({
         ? routerState.initialData.websites.map((website) => ({ website }))
         : initialRecord?.data?.websites?.length
           ? initialRecord.data.websites.map((website) => ({ website }))
-          : [{ name: 'website' }],
+          : [{ website: '' }],
       customFields: initialRecord?.data?.customFields ?? [],
       folder: selectedFolder ?? initialRecord?.folder
     },

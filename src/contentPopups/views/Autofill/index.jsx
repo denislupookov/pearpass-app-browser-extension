@@ -8,6 +8,7 @@ import { useRouter } from '../../../shared/context/RouterContext'
 import { UserIcon } from '../../../shared/icons/UserIcon'
 import { UserKeyIcon } from '../../../shared/icons/UserKeyIcon'
 import { MESSAGE_TYPES } from '../../../shared/services/messageBridge'
+import { logger } from '../../../shared/utils/logger'
 import { useFilteredRecords } from '../../hooks/useFilteredRecords'
 
 export const Autofill = () => {
@@ -28,7 +29,7 @@ export const Autofill = () => {
       { type: MESSAGE_TYPES.GET_CONDITIONAL_PASSKEY_REQUEST },
       (response) => {
         if (chrome.runtime.lastError) {
-          console.error(
+          logger.error(
             'Failed to get passkey request:',
             chrome.runtime.lastError
           )
@@ -160,7 +161,7 @@ export const Autofill = () => {
       },
       () => {
         if (chrome.runtime.lastError) {
-          console.error('Failed to authenticate:', chrome.runtime.lastError)
+          logger.error('Failed to authenticate:', chrome.runtime.lastError)
           setIsAuthenticating(false)
           return
         }
@@ -236,35 +237,43 @@ export const Autofill = () => {
         </div>
       ) : (
         <div className="flex flex-col gap-2 overflow-x-hidden overflow-y-auto">
-          <span className="text-white-mode1 text-sm">
-            Make the access with...
-          </span>
-
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-col">
-              {passkeyRecords.length > 0 && (
-                <>
-                  <div className="text-white-mode1 mb-[5px] flex items-center gap-2 text-sm">
-                    <UserKeyIcon size="24" />
-                    <span>Passkey</span>
-                  </div>
-                  {renderRecordList(passkeyRecords)}
-                </>
-              )}
+          {passkeyRecords.length === 0 && regularLogins.length === 0 ? (
+            <div className="flex">
+              <span className="text-white-mode1 text-sm">No records found</span>
             </div>
+          ) : (
+            <>
+              <span className="text-white-mode1 text-sm">
+                Make the access with...
+              </span>
 
-            <div className="flex flex-col">
-              {regularLogins.length > 0 && (
-                <>
-                  <div className="text-white-mode1 mb-[5px] flex items-center gap-2 text-sm">
-                    <UserIcon size="24" />
-                    <span>Password</span>
-                  </div>
-                  {renderRecordList(regularLogins)}
-                </>
-              )}
-            </div>
-          </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-col">
+                  {passkeyRecords.length > 0 && (
+                    <>
+                      <div className="text-white-mode1 mb-[5px] flex items-center gap-2 text-sm">
+                        <UserKeyIcon size="24" />
+                        <span>Passkey</span>
+                      </div>
+                      {renderRecordList(passkeyRecords)}
+                    </>
+                  )}
+                </div>
+
+                <div className="flex flex-col">
+                  {regularLogins.length > 0 && (
+                    <>
+                      <div className="text-white-mode1 mb-[5px] flex items-center gap-2 text-sm">
+                        <UserIcon size="24" />
+                        <span>Password</span>
+                      </div>
+                      {renderRecordList(regularLogins)}
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </PopupCard>

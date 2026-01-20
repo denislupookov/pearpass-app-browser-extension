@@ -1,14 +1,8 @@
-import { PASSKEY_SUPPORT_ENABLED } from 'pearpass-lib-constants/src/constants/flags'
-
 import { CONTENT_MESSAGE_TYPES } from '../shared/constants/nativeMessaging'
 import { arrayBufferToBase64Url } from '../shared/utils/arrayBufferToBase64Url'
 import { base64UrlToArrayBuffer } from '../shared/utils/base64UrlToArrayBuffer'
 import { logger } from '../shared/utils/logger'
 ;(() => {
-  if (!PASSKEY_SUPPORT_ENABLED) {
-    return
-  }
-
   const { credentials: nativeCreds } = navigator
   const nativeCreate = nativeCreds.create.bind(nativeCreds)
   const nativeGet = nativeCreds.get.bind(nativeCreds)

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { t } from '@lingui/core/macro'
 import {
@@ -17,6 +17,7 @@ import { ArrowDownIcon } from '../../../shared/icons/ArrowDownIcon'
 import { HardwareKey } from '../../../shared/icons/HardwareKey'
 import { LockCircleIcon } from '../../../shared/icons/LockCircleIcon'
 import { UserIcon } from '../../../shared/icons/UserIcon'
+import { isSameOrSubdomain } from '../../../shared/utils/isSameOrSubdomain'
 import { logger } from '../../../shared/utils/logger'
 import { normalizeUrl } from '../../../shared/utils/normalizeUrl'
 
@@ -48,7 +49,12 @@ export const PasskeyContainer = ({
   const { refetch: refetchVault, data: vaultData } = useVault()
   const { state: routerState, navigate } = useRouter()
 
-  const { serializedPublicKey, requestId, requestOrigin, tabId } = routerState
+  const {
+    serializedPublicKey = null,
+    requestId = null,
+    requestOrigin = null,
+    tabId = null
+  } = routerState ?? {}
 
   const { data: vaultsData, refetch: refetchVaults } = useVaults()
   const { refetch: refetchRecords } = useRecords()
@@ -57,6 +63,7 @@ export const PasskeyContainer = ({
   const [searchQuery, setSearchQuery] = useState('')
   const [isVaultDropdownOpen, setIsVaultDropdownOpen] = useState(false)
   const [isVaultChanging, setIsVaultChanging] = useState(false)
+  const dropdownRef = useRef(null)
 
   const availableVaults = useMemo(
     () => (vaultsData || []).filter((vault) => vault.id !== vaultData?.id),
@@ -67,6 +74,7 @@ export const PasskeyContainer = ({
     setIsVaultChanging(true)
     try {
       await refetchVault(vault.id)
+      await Promise.all([refetchRecords(), refetchUserData(), refetchVaults()])
       setIsVaultDropdownOpen(false)
       onVaultChange?.()
     } catch (error) {
@@ -79,8 +87,12 @@ export const PasskeyContainer = ({
   useGlobalLoading({ isLoading: isVaultChanging })
 
   useEffect(() => {
+    let cancelled = false
+
     const refreshData = async () => {
       const currentUserData = await refetchUserData()
+
+      if (cancelled) return
 
       if (!currentUserData?.isLoggedIn || !currentUserData?.isVaultOpen) {
         const passkeyParams = {
@@ -103,10 +115,41 @@ export const PasskeyContainer = ({
         return
       }
 
-      await Promise.all([refetchVault(), refetchRecords(), refetchVaults()])
+      if (!cancelled) {
+        await Promise.all([refetchVault(), refetchRecords(), refetchVaults()])
+      }
     }
+
     refreshData()
-  }, [])
+
+    return () => {
+      cancelled = true
+    }
+  }, [serializedPublicKey, requestId, requestOrigin, tabId])
+
+  useEffect(() => {
+    if (!isVaultDropdownOpen) return
+
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsVaultDropdownOpen(false)
+      }
+    }
+
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape') {
+        setIsVaultDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscapeKey)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscapeKey)
+    }
+  }, [isVaultDropdownOpen])
 
   const publicKeyData = useMemo(() => {
     if (!serializedPublicKey) return null
@@ -130,9 +173,8 @@ export const PasskeyContainer = ({
       return websites.some((site) => {
         const normalizedSite = normalizeUrl(site, true)
         return (
-          normalizedSite === normalizedRpId ||
-          normalizedSite.includes(normalizedRpId) ||
-          normalizedRpId.includes(normalizedSite)
+          isSameOrSubdomain(normalizedSite, normalizedRpId) ||
+          isSameOrSubdomain(normalizedRpId, normalizedSite)
         )
       })
     })
@@ -141,8 +183,12 @@ export const PasskeyContainer = ({
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter(
         (record) =>
-          record.data.title?.toLowerCase().includes(query) ||
-          record.data.username?.toLowerCase().includes(query)
+          String(record.data?.title ?? '')
+            .toLowerCase()
+            .includes(query) ||
+          String(record.data?.username ?? '')
+            .toLowerCase()
+            .includes(query)
       )
     }
 
@@ -162,10 +208,11 @@ export const PasskeyContainer = ({
           placeholder={t`Search...`}
         />
 
-        <div className="relative inline-block">
+        <div ref={dropdownRef} className="relative inline-block">
           <button
             onClick={() => setIsVaultDropdownOpen(!isVaultDropdownOpen)}
-            className="bg-grey400-mode1 flex items-center gap-[7px] rounded-[10px] px-[10px] py-[9px]"
+            disabled={isVaultChanging}
+            className="bg-grey400-mode1 flex items-center gap-[7px] rounded-[10px] px-[10px] py-[9px] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ArrowDownIcon size="12" />
             <LockCircleIcon size="24" />

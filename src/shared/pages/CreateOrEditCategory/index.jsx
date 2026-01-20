@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 
 import { RECORD_TYPES, useRecordById } from 'pearpass-lib-vault'
 
-import { sanitizeCredentialForPage } from './utils/sanitizeCredentialForPage'
 import { CreateOrEditCreditCard } from '../../../action/containers/CreateOrEditCreditCard'
 import { CreateOrEditCustom } from '../../../action/containers/CreateOrEditCustom'
 import { CreateOrEditIdentity } from '../../../action/containers/CreateOrEditIdentity'
@@ -13,6 +12,7 @@ import { CreateOrEditWifi } from '../../../action/containers/CreateOrEditWifi'
 import { CONTENT_MESSAGE_TYPES } from '../../constants/nativeMessaging'
 import { useRouter } from '../../context/RouterContext'
 import { useIsPasskeyPopup } from '../../hooks/useIsPasskeyPopup'
+import { sanitizeCredentialForPage } from '../../utils/sanitizeCredentialForPage'
 
 export const CreateOrEditCategory = () => {
   const { params, state: routerState, navigate } = useRouter()
