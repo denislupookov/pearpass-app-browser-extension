@@ -29,13 +29,16 @@ export const CreatePasskey = () => {
         serializedPublicKey
       })
 
-      const { credential } = response
+      const { credential, publicKey } = response
 
       navigate('createOrEditCategory', {
         params: { recordId: record.id },
         state: {
           inPasskeyFlow: true,
           passkeyCredential: credential,
+          initialData: {
+            username: record.data?.username || publicKey.user.name
+          },
           serializedPublicKey,
           requestId,
           requestOrigin,
