@@ -11,7 +11,6 @@ import {
 import { InputSearch } from '../../../shared/components/InputSearch'
 import { RecordItem } from '../../../shared/components/RecordItem'
 import { Vault } from '../../../shared/components/Vault'
-import { PASSKEY_VERIFICATION_OPTIONS } from '../../../shared/constants/storage'
 import { useGlobalLoading } from '../../../shared/context/LoadingContext'
 import { useRouter } from '../../../shared/context/RouterContext'
 import { ArrowDownIcon } from '../../../shared/icons/ArrowDownIcon'
@@ -21,7 +20,7 @@ import { UserIcon } from '../../../shared/icons/UserIcon'
 import { isSameOrSubdomain } from '../../../shared/utils/isSameOrSubdomain'
 import { logger } from '../../../shared/utils/logger'
 import { normalizeUrl } from '../../../shared/utils/normalizeUrl'
-import { getPasskeyVerificationPreference } from '../../../shared/utils/passkeyVerificationPreference'
+import { shouldRequireVerification } from '../../../shared/utils/passkeyVerificationPreference'
 
 /**
  * Reusable passkey selection UI component
@@ -49,7 +48,7 @@ export const PasskeyContainer = ({
   children
 }) => {
   const { refetch: refetchVault, data: vaultData } = useVault()
-  const { state: routerState, navigate } = useRouter()
+  const { state: routerState, navigate, currentPage } = useRouter()
 
   const {
     serializedPublicKey = null,
@@ -105,18 +104,7 @@ export const PasskeyContainer = ({
 
       if (cancelled) return
 
-      const userPreference = getPasskeyVerificationPreference()
-      const websiteRequiresVerification =
-        publicKey?.userVerification === 'required'
-
-      let requiresVerification = false
-      if (userPreference === PASSKEY_VERIFICATION_OPTIONS.ALWAYS) {
-        requiresVerification = true
-      } else if (userPreference === PASSKEY_VERIFICATION_OPTIONS.NEVER) {
-        requiresVerification = false
-      } else {
-        requiresVerification = websiteRequiresVerification
-      }
+      const requiresVerification = shouldRequireVerification(publicKey)
 
       const needsAuth =
         !currentUserData?.isLoggedIn ||
@@ -125,7 +113,7 @@ export const PasskeyContainer = ({
 
       if (needsAuth) {
         const passkeyParams = {
-          page: 'getPasskey',
+          page: currentPage,
           serializedPublicKey,
           requestId,
           requestOrigin,
@@ -166,7 +154,8 @@ export const PasskeyContainer = ({
     requestId,
     requestOrigin,
     tabId,
-    routerState?.isVerified
+    routerState?.isVerified,
+    currentPage
   ])
 
   useEffect(() => {
