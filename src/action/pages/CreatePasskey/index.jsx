@@ -29,13 +29,17 @@ export const CreatePasskey = () => {
         serializedPublicKey
       })
 
-      const { credential } = response
+      const { credential, publicKey } = response
 
       navigate('createOrEditCategory', {
         params: { recordId: record.id },
         state: {
           inPasskeyFlow: true,
           passkeyCredential: credential,
+          passkeyCreatedAt: Date.now(),
+          initialData: {
+            username: record.data?.username || publicKey.user.name
+          },
           serializedPublicKey,
           requestId,
           requestOrigin,
@@ -65,6 +69,7 @@ export const CreatePasskey = () => {
           state: {
             inPasskeyFlow: true,
             passkeyCredential: credential,
+            passkeyCreatedAt: Date.now(),
             initialData: {
               title: publicKey.rp.name,
               username: publicKey.user.name,
@@ -140,14 +145,37 @@ export const CreatePasskey = () => {
     }
   }
 
-  const recordsFiltered = useMemo(
-    () =>
-      records.filter((record) => {
-        if (record.type !== RECORD_TYPES.LOGIN) return false
-        return record
-      }),
-    [records]
-  )
+  const recordsFiltered = useMemo(() => {
+    const loginRecords = records.filter(
+      (record) => record.type === RECORD_TYPES.LOGIN
+    )
+
+    let publicKeyData = null
+    if (serializedPublicKey) {
+      try {
+        publicKeyData = JSON.parse(serializedPublicKey)
+      } catch {
+        return loginRecords
+      }
+    }
+
+    if (!publicKeyData) {
+      return loginRecords
+    }
+
+    const passkeyUsername = publicKeyData.user?.name || ''
+
+    return loginRecords.filter((record) => {
+      const recordUsername = record.data?.username || ''
+      const usernameMatches =
+        passkeyUsername && recordUsername
+          ? passkeyUsername === recordUsername
+          : false
+      const hasNoUsername = !recordUsername || recordUsername.trim() === ''
+
+      return usernameMatches || hasNoUsername
+    })
+  }, [records, serializedPublicKey])
 
   return (
     <PasskeyContainer

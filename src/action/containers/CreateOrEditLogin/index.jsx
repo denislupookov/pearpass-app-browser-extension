@@ -23,6 +23,7 @@ import { PasswordIcon } from '../../../shared/icons/PasswordIcon'
 import { PlusIcon } from '../../../shared/icons/PlusIcon'
 import { UserIcon } from '../../../shared/icons/UserIcon'
 import { WorldIcon } from '../../../shared/icons/WorldIcon'
+import { formatPasskeyDate } from '../../../shared/utils/formatPasskeyDate'
 import { normalizeUrl } from '../../../shared/utils/normalizeUrl'
 import { CreateCustomField } from '../CreateCustomField'
 import { CustomFields } from '../CustomFields'
@@ -106,6 +107,7 @@ export const CreateOrEditLogin = ({
 
   const onSubmit = (values) => {
     const passkeyCredential = routerState?.passkeyCredential
+    const passkeyCreatedAt = routerState?.passkeyCreatedAt
 
     const data = {
       type: RECORD_TYPES.LOGIN,
@@ -116,6 +118,9 @@ export const CreateOrEditLogin = ({
         username: values.username,
         password: values.password,
         credential: passkeyCredential || initialRecord?.data?.credential,
+        passkeyCreatedAt: passkeyCredential
+          ? passkeyCreatedAt || Date.now()
+          : initialRecord?.data?.passkeyCreatedAt,
         note: values.note,
         websites: values.websites
           .filter((website) => !!website?.website?.trim().length)
@@ -198,7 +203,12 @@ export const CreateOrEditLogin = ({
             !!routerState?.passkeyCredential) && (
             <InputField
               label={t`Passkey`}
-              placeholder={t`Passkey Stored`}
+              value={
+                formatPasskeyDate(
+                  routerState?.passkeyCreatedAt ||
+                    initialRecord?.data?.passkeyCreatedAt
+                ) || t`Passkey Stored`
+              }
               variant="outline"
               icon={KeyIcon}
               readonly
