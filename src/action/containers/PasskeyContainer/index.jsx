@@ -20,6 +20,7 @@ import { UserIcon } from '../../../shared/icons/UserIcon'
 import { isSameOrSubdomain } from '../../../shared/utils/isSameOrSubdomain'
 import { logger } from '../../../shared/utils/logger'
 import { normalizeUrl } from '../../../shared/utils/normalizeUrl'
+import { shouldRequireVerification } from '../../../shared/utils/passkeyVerificationPreference'
 
 /**
  * Reusable passkey selection UI component
@@ -47,7 +48,7 @@ export const PasskeyContainer = ({
   children
 }) => {
   const { refetch: refetchVault, data: vaultData } = useVault()
-  const { state: routerState, navigate } = useRouter()
+  const { state: routerState, navigate, currentPage } = useRouter()
 
   const {
     serializedPublicKey = null,
@@ -64,6 +65,7 @@ export const PasskeyContainer = ({
   const [isVaultDropdownOpen, setIsVaultDropdownOpen] = useState(false)
   const [isVaultChanging, setIsVaultChanging] = useState(false)
   const dropdownRef = useRef(null)
+  const hasInitialized = useRef(false)
 
   const availableVaults = useMemo(
     () => (vaultsData || []).filter((vault) => vault.id !== vaultData?.id),
@@ -74,7 +76,7 @@ export const PasskeyContainer = ({
     setIsVaultChanging(true)
     try {
       await refetchVault(vault.id)
-      await Promise.all([refetchRecords(), refetchUserData(), refetchVaults()])
+      await Promise.all([refetchUserData(), refetchVaults()])
       setIsVaultDropdownOpen(false)
       onVaultChange?.()
     } catch (error) {
@@ -87,29 +89,50 @@ export const PasskeyContainer = ({
   useGlobalLoading({ isLoading: isVaultChanging })
 
   useEffect(() => {
+    if (hasInitialized.current) return
+
     let cancelled = false
 
     const refreshData = async () => {
       const currentUserData = await refetchUserData()
+      let publicKey
+      try {
+        publicKey = JSON.parse(serializedPublicKey)
+      } catch (e) {
+        logger.error('Failed to parse public key', e)
+      }
 
       if (cancelled) return
 
-      if (!currentUserData?.isLoggedIn || !currentUserData?.isVaultOpen) {
+      const requiresVerification = shouldRequireVerification(publicKey)
+
+      const needsAuth =
+        !currentUserData?.isLoggedIn ||
+        !currentUserData?.isVaultOpen ||
+        (requiresVerification && !routerState?.isVerified)
+
+      if (needsAuth) {
         const passkeyParams = {
-          page: 'getPasskey',
+          page: currentPage,
           serializedPublicKey,
           requestId,
           requestOrigin,
           tabId,
-          inPasskeyFlow: true
+          inPasskeyFlow: true,
+          isVerified: true
         }
 
         const targetState = !currentUserData?.isLoggedIn
           ? 'masterPassword'
           : 'vaults'
 
+        const stateToUse =
+          requiresVerification && !routerState?.isVerified
+            ? 'masterPassword'
+            : targetState
+
         navigate('welcome', {
-          params: { state: targetState },
+          params: { state: stateToUse },
           state: passkeyParams
         })
         return
@@ -117,6 +140,7 @@ export const PasskeyContainer = ({
 
       if (!cancelled) {
         await Promise.all([refetchVault(), refetchRecords(), refetchVaults()])
+        hasInitialized.current = true
       }
     }
 
@@ -125,7 +149,14 @@ export const PasskeyContainer = ({
     return () => {
       cancelled = true
     }
-  }, [serializedPublicKey, requestId, requestOrigin, tabId])
+  }, [
+    serializedPublicKey,
+    requestId,
+    requestOrigin,
+    tabId,
+    routerState?.isVerified,
+    currentPage
+  ])
 
   useEffect(() => {
     if (!isVaultDropdownOpen) return
