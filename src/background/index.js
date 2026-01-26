@@ -8,7 +8,8 @@ import { AUTH_ERROR_PATTERNS } from '../shared/constants/auth'
 import { CRYPTO_ALGORITHMS, ELLIPTIC_CURVES } from '../shared/constants/crypto'
 import {
   ERROR_CODES,
-  CONTENT_MESSAGE_TYPES
+  CONTENT_MESSAGE_TYPES,
+  PAIRING_ERROR_PATTERNS
 } from '../shared/constants/nativeMessaging'
 import { passkeyWindowSize } from '../shared/constants/windowSizes'
 import {
@@ -245,7 +246,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         if (!pairingToken) {
           sendResponse({
             success: false,
-            error: 'PairingTokenRequired',
+            error: PAIRING_ERROR_PATTERNS.PAIRING_TOKEN_REQUIRED,
             code: ERROR_CODES.INVALID_REQUEST
           })
           return
@@ -314,6 +315,22 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           success: false,
           error: e?.message,
           code: ERROR_CODES.AUTHENTICATION_FAILED
+        })
+      }
+    })()
+    return true
+  }
+
+  if (msg.type === SECURE_MESSAGE_TYPES.GET_BLOCKING_STATE) {
+    ;(async () => {
+      try {
+        const blockingState = await secureChannel.getBlockingState()
+        sendResponse({ success: true, blockingState })
+      } catch (e) {
+        sendResponse({
+          success: false,
+          error: e?.message,
+          code: ERROR_CODES.UNKNOWN
         })
       }
     })()
