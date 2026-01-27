@@ -326,7 +326,7 @@ export class SecureChannelClient {
       if (publicKey) {
         clientPublicKeyB64 = base64Encode(publicKey)
       }
-    } catch (e) {
+    } catch {
       logger.log('Failed to prepare client identity for pairing')
       // Proceed without sending client public key; desktop will still pair but
       // will not yet pin a client identity.
