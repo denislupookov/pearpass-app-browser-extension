@@ -268,8 +268,8 @@ runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === MESSAGE_TYPES.CONFIRM_PAIR) {
     ;(async () => {
       try {
-        await secureChannel.pinIdentity(msg.identity)
-        return sendResponse({ ok: true })
+        const { confirmed } = await secureChannel.confirmPairing()
+        sendResponse({ success: true, confirmed })
       } catch (e) {
         sendResponse({
           success: false,
@@ -281,15 +281,30 @@ runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true
   }
 
-  if (msg.type === MESSAGE_TYPES.CHECK_PAIRED) {
+  if (msg.type === SECURE_MESSAGE_TYPES.PIN_IDENTITY) {
     ;(async () => {
       try {
-        const paired = await secureChannel.isPaired()
-        sendResponse({ success: true, paired })
+        await secureChannel.pinIdentity(msg.identity)
+        sendResponse({ success: true })
       } catch (e) {
         sendResponse({
           success: false,
-          paired: false,
+          error: e?.message,
+          code: ERROR_CODES.UNKNOWN
+        })
+      }
+    })()
+    return true
+  }
+
+  if (msg.type === SECURE_MESSAGE_TYPES.UNPAIR) {
+    ;(async () => {
+      try {
+        await secureChannel.unpair()
+        sendResponse({ success: true })
+      } catch (e) {
+        sendResponse({
+          success: false,
           error: e?.message,
           code: ERROR_CODES.UNKNOWN
         })
