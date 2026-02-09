@@ -72,9 +72,6 @@ export const AboutContent = () => {
   return (
     <div className="flex w-full flex-col gap-6">
       <CardSingleSetting title={t`Report a problem`}>
-        <p className="font-inter text-grey100-mode1 mb-2 text-[14px] leading-normal">
-          {t`Tell us what's going wrong and leave your email so we can follow up with you.`}
-        </p>
         <form
           className="flex flex-col gap-[15px]"
           onSubmit={(e) => {
