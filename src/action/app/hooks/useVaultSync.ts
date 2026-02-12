@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { useVault } from 'pearpass-lib-vault'
 
 import { useRouter } from '../../../shared/context/RouterContext'
+import { logger } from '../../../shared/utils/logger'
 
 export const useVaultSync = (): void => {
     const { currentPage, navigate } = useRouter()
@@ -13,7 +14,7 @@ export const useVaultSync = (): void => {
             try {
                 await syncVault()
             } catch (error) {
-                console.error('Error syncing vault:', error)
+                logger.error('Error syncing vault:', error)
             }
         }
 
