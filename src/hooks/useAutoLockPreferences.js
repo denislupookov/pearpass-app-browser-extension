@@ -36,7 +36,7 @@ export const AutoLockProvider = ({ children }) => {
       ['autoLockEnabled', 'autoLockTimeoutMs'],
       (res) => {
         if (typeof res.autoLockEnabled === 'boolean') {
-          // setIsAutoLockEnabledState(res.autoLockEnabled)
+          setIsAutoLockEnabledState(res.autoLockEnabled)
         }
         //newValue can be null when selected "never"
         if (
