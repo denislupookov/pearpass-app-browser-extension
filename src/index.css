@@ -3,8 +3,7 @@
 
 @font-face {
   font-family: 'Humble Nostalgia';
-  src: url('/assets/fonts/humbleNostalgia/HumbleNostalgia.otf')
-    format('OpenType');
+  src: url('/assets/fonts/humbleNostalgia/HumbleNostalgia.otf') format('OpenType');
   font-weight: normal;
   font-style: normal;
 }
@@ -14,8 +13,7 @@
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url('/assets/fonts/inter/Inter-VariableFont_opsz,wght.ttf')
-    format('truetype');
+  src: url('/assets/fonts/inter/Inter-VariableFont_opsz,wght.ttf') format('truetype');
 }
 
 @theme {
@@ -24,6 +22,7 @@
 }
 
 @layer base {
+
   h1,
   h2,
   h3,
@@ -40,9 +39,13 @@
   box-sizing: border-box;
 }
 
+[data-theme] {
+  display: contents !important;
+}
+
 *::-webkit-scrollbar {
   display: none;
-  
+
 }
 
 .custom-slider::-webkit-slider-thumb {
@@ -51,15 +54,16 @@
   height: 16px;
   width: 16px;
   border-radius: 50%;
-  background-color: #BADE5B; /* Replace with actual color (e.g., colors.primary400.mode1) */
+  background-color: #BADE5B;
+  /* Replace with actual color (e.g., colors.primary400.mode1) */
   border: none;
   cursor: pointer;
 
   &:hover {
-      box-shadow: 0 0 0 4px #BADE5B66
-    }
-  
-     &:active::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px #BADE5B66
+  }
+
+  &:active::-webkit-slider-thumb {
     box-shadow: 0 0 0 4px #BADE5B66;
   }
 
