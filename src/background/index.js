@@ -1,5 +1,5 @@
 import './nativeMessaging' // Initialize native messaging handler
-import { AUTHENTICATOR_ENABLED } from 'pearpass-lib-constants'
+import { DESIGN_VERSION } from 'pearpass-lib-constants'
 
 import { ensureClientKeypairUnlocked } from './clientKeyStore'
 import { MESSAGES, ALARMS } from './constants'
@@ -31,7 +31,7 @@ const conditionalPasskeyRequests = new Map()
 
 // Open onboarding page on install
 chrome.runtime.onInstalled.addListener((details) => {
-  if (AUTHENTICATOR_ENABLED && details.reason === 'install') {
+  if (DESIGN_VERSION && details.reason === 'install') {
     chrome.tabs.create({ url: chrome.runtime.getURL('onboarding.html') })
   }
 })
