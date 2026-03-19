@@ -105,12 +105,7 @@ export const Step2Dialog = ({ onNext }: Step2Props) => {
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
-              <Text
-                as="span"
-                variant="body"
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                style={{ color: ONBOARDING_ICON_COLOR } as any}
-              >
+              <Text as="span" variant="body" color={ONBOARDING_ICON_COLOR}>
                 <Trans>Pearpass</Trans>
               </Text>
               <Text as="span" variant="body">
@@ -126,12 +121,7 @@ export const Step2Dialog = ({ onNext }: Step2Props) => {
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
-              <Text
-                as="span"
-                variant="body"
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                style={{ color: ONBOARDING_ICON_COLOR } as any}
-              >
+              <Text as="span" variant="body" color={ONBOARDING_ICON_COLOR}>
                 <Trans>Settings → Syncing → Your Devices.</Trans>
               </Text>
             </div>
@@ -144,12 +134,7 @@ export const Step2Dialog = ({ onNext }: Step2Props) => {
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
-              <Text
-                as="span"
-                variant="body"
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                style={{ color: ONBOARDING_ICON_COLOR } as any}
-              >
+              <Text as="span" variant="body" color={ONBOARDING_ICON_COLOR}>
                 <Trans>Generate Pair Code for Browser Extension</Trans>
               </Text>
               <Text as="span" variant="body">

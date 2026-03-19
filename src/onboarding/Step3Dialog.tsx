@@ -68,12 +68,7 @@ export const Step3Dialog = () => {
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
-              <Text
-                as="span"
-                variant="body"
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                style={{ color: ONBOARDING_ICON_COLOR } as any}
-              >
+              <Text as="span" variant="body" color={ONBOARDING_ICON_COLOR}>
                 <Trans>Browser connected</Trans>
               </Text>
             </div>
@@ -83,12 +78,7 @@ export const Step3Dialog = () => {
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
-              <Text
-                as="span"
-                variant="body"
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                style={{ color: ONBOARDING_ICON_COLOR } as any}
-              >
+              <Text as="span" variant="body" color={ONBOARDING_ICON_COLOR}>
                 <Trans>Sync activated</Trans>
               </Text>
             </div>
@@ -98,12 +88,7 @@ export const Step3Dialog = () => {
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
-              <Text
-                as="span"
-                variant="body"
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                style={{ color: ONBOARDING_ICON_COLOR } as any}
-              >
+              <Text as="span" variant="body" color={ONBOARDING_ICON_COLOR}>
                 <Trans>Autofill enabled</Trans>
               </Text>
             </div>

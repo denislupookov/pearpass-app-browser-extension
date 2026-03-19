@@ -213,9 +213,9 @@ export const PairingRequiredModalContentV2 = ({
               <div className="border-primary400-mode1 absolute h-full w-full animate-spin rounded-full border-4 border-t-transparent shadow-[0_0_15px_rgba(var(--primary400),0.3)]"></div>
               <div className="bg-primary400-mode1/20 h-10 w-10 animate-pulse rounded-full"></div>
             </div>
-            <span className="text-white-mode1 font-inter text-lg font-medium tracking-wide">
+            <Text variant="bodyEmphasized">
               <Trans>Verifying Connection...</Trans>
-            </span>
+            </Text>
           </div>
         </div>
       )}
