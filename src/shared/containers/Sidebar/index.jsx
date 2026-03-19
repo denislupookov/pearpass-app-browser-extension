@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { t } from '@lingui/core/macro'
-import { colors } from 'pearpass-lib-ui-theme-provider'
+import { AUTHENTICATOR_ENABLED } from '@tetherto/pearpass-lib-constants'
+import { colors } from '@tetherto/pearpass-lib-ui-theme-provider'
 import {
   closeAllInstances,
   useFolders,
   useVault,
   useVaults
-} from 'pearpass-lib-vault'
+} from '@tetherto/pearpass-lib-vault'
 
 import { ButtonPrimary } from '../../components/ButtonPrimary'
 import { VaultActionsPopupContent } from '../../components/VaultActionsPopupContent'
@@ -21,6 +22,7 @@ import { BrushIcon } from '../../icons/BrushIcon'
 import { DeleteIcon } from '../../icons/DeleteIcon'
 import { ExitIcon } from '../../icons/ExitIcon'
 import { FolderIcon } from '../../icons/FolderIcon'
+import { LockIcon } from '../../icons/LockIcon'
 import { SettingsIcon } from '../../icons/SettingsIcon'
 import { StarIcon } from '../../icons/StarIcon'
 import { UserSecurityIcon } from '../../icons/UserSecurityIcon'
@@ -190,7 +192,7 @@ export const Sidebar = ({ isOpen, onClose, width = '280px' }) => {
           transform: isAnimating ? 'translateX(0)' : 'translateX(-100%)'
         }}
       >
-        <div className="flex flex-1 flex-col gap-2.5 overflow-hidden">
+        <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto">
           <DropdownSwapVault
             vaults={vaults}
             selectedVault={vaultData}
@@ -220,6 +222,19 @@ export const Sidebar = ({ isOpen, onClose, width = '280px' }) => {
           />
         </div>
         <div className="flex flex-col gap-2.5">
+          {AUTHENTICATOR_ENABLED && (
+            <button
+              onClick={() => {
+                navigate('authenticator')
+                onClose()
+              }}
+              className="text-white-mode1 bg-grey400-mode1 flex cursor-pointer items-center gap-1 rounded-[10px] px-[15px] py-[8px] text-[14px]"
+            >
+              <LockIcon size="24" color={colors.white.mode1} />
+              {t`Authenticator`}
+            </button>
+          )}
+
           <button
             onClick={() => {
               navigate('settings')

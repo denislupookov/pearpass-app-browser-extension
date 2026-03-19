@@ -1,9 +1,14 @@
 import React from 'react'
 
 import { t } from '@lingui/core/macro'
-import { useForm } from 'pear-apps-lib-ui-react-hooks'
-import { Validator } from 'pear-apps-utils-validator'
-import { RECORD_TYPES, useCreateRecord, useRecords } from 'pearpass-lib-vault'
+import { useForm } from '@tetherto/pear-apps-lib-ui-react-hooks'
+import { Validator } from '@tetherto/pear-apps-utils-validator'
+import { AUTHENTICATOR_ENABLED } from '@tetherto/pearpass-lib-constants'
+import {
+  RECORD_TYPES,
+  useCreateRecord,
+  useRecords
+} from '@tetherto/pearpass-lib-vault'
 
 import { ButtonRoundIcon } from '../../../shared/components/ButtonRoundIcon'
 import { ButtonSingleInput } from '../../../shared/components/ButtonSingleInput'
@@ -19,6 +24,7 @@ import { useIsPasskeyPopup } from '../../../shared/hooks/useIsPasskeyPopup'
 import { CommonFileIcon } from '../../../shared/icons/CommonFileIcon'
 import { DeleteIcon } from '../../../shared/icons/DeleteIcon'
 import { KeyIcon } from '../../../shared/icons/KeyIcon'
+import { LockIcon } from '../../../shared/icons/LockIcon'
 import { PasswordIcon } from '../../../shared/icons/PasswordIcon'
 import { PlusIcon } from '../../../shared/icons/PlusIcon'
 import { UserIcon } from '../../../shared/icons/UserIcon'
@@ -43,6 +49,7 @@ export const CreateOrEditLogin = ({
     title: Validator.string().required(t`Title is required`),
     username: Validator.string(),
     password: Validator.string(),
+    otpSecret: Validator.string(),
     note: Validator.string(),
     websites: Validator.array().items(
       Validator.object({
@@ -79,6 +86,8 @@ export const CreateOrEditLogin = ({
         initialRecord?.data?.username ||
         '',
       password: initialRecord?.data?.password ?? '',
+      otpSecret:
+        initialRecord?.data?.otpInput ?? initialRecord?.data?.otp?.secret ?? '',
       note: initialRecord?.data?.note ?? '',
       websites: routerState?.initialData?.websites?.length
         ? routerState.initialData.websites.map((website) => ({ website }))
@@ -109,6 +118,8 @@ export const CreateOrEditLogin = ({
     const passkeyCredential = routerState?.passkeyCredential
     const passkeyCreatedAt = routerState?.passkeyCreatedAt
 
+    const otpInput = values.otpSecret?.trim() || undefined
+
     const data = {
       type: RECORD_TYPES.LOGIN,
       folder: values.folder,
@@ -117,6 +128,7 @@ export const CreateOrEditLogin = ({
         title: values.title,
         username: values.username,
         password: values.password,
+        otpInput,
         credential: passkeyCredential || initialRecord?.data?.credential,
         passkeyCreatedAt: passkeyCredential
           ? passkeyCreatedAt || Date.now()
@@ -215,6 +227,18 @@ export const CreateOrEditLogin = ({
             />
           )}
         </FormGroup>
+
+        {AUTHENTICATOR_ENABLED && (
+          <FormGroup>
+            <InputFieldPassword
+              label={t`Authenticator Secret Key`}
+              placeholder={t`Enter Secret Key or otpauth:// URI`}
+              variant="outline"
+              icon={LockIcon}
+              {...register('otpSecret')}
+            />
+          </FormGroup>
+        )}
 
         <CompoundField>
           {websitesList.map((website, index) => (

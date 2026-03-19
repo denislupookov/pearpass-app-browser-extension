@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { RECORD_TYPES, useRecordById } from 'pearpass-lib-vault'
+import { RECORD_TYPES, useRecordById } from '@tetherto/pearpass-lib-vault'
 
 import { CreateOrEditCreditCard } from '../../../action/containers/CreateOrEditCreditCard'
 import { CreateOrEditCustom } from '../../../action/containers/CreateOrEditCustom'
@@ -58,7 +58,7 @@ export const CreateOrEditCategory = () => {
         })
       } else if (initialRecord && Object.keys(initialRecord).length > 0) {
         navigate('recordDetails', {
-          params: { recordId: initialRecord.id },
+          params: { recordId: initialRecord.id, source: params?.source },
           state: {}
         })
       } else {

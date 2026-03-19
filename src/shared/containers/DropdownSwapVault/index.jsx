@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { t } from '@lingui/core/macro'
-import { useVault } from 'pearpass-lib-vault'
+import { useVault } from '@tetherto/pearpass-lib-vault'
 
 import { useModal } from '../../context/ModalContext'
 import { ArrowDownIcon } from '../../icons/ArrowDownIcon'
@@ -156,7 +156,7 @@ export const DropdownSwapVault = ({
         style={{
           transitionDuration: `${TRANSITION_DURATION}ms`,
           padding: isOpen ? '10px' : '0 10px',
-          maxHeight: isOpen ? '130px' : '0',
+          maxHeight: isOpen ? '500px' : '0',
           opacity: isOpen ? 1 : 0,
           overflowY: isOpen ? 'auto' : 'hidden',
           pointerEvents: isOpen ? 'auto' : 'none'
