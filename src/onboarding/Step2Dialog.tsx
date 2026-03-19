@@ -7,13 +7,10 @@ import {
   Text,
   InputField,
   AlertMessage,
-  DialogSurface
+  DialogSurface,
+  useTheme
 } from '@tetherto/pearpass-lib-ui-kit'
-import {
-  ONBOARDING_DIALOG_HEIGHT,
-  ONBOARDING_ICON_COLOR,
-  ONBOARDING_ICON_SIZE
-} from './constants'
+import { ONBOARDING_DIALOG_HEIGHT, ONBOARDING_ICON_SIZE } from './constants'
 import { secureChannelMessages } from '../shared/services/messageBridge'
 import {
   PearpassLogo,
@@ -26,6 +23,9 @@ interface Step2Props {
 }
 
 export const Step2Dialog = ({ onNext }: Step2Props) => {
+  const { theme } = useTheme()
+  const iconColor = theme.colors.colorPrimary
+
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -101,11 +101,11 @@ export const Step2Dialog = ({ onNext }: Step2Props) => {
                 <Trans>1. Open the</Trans>
               </Text>
               <PearpassLogo
-                color={ONBOARDING_ICON_COLOR}
+                color={iconColor}
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
-              <Text as="span" variant="body" color={ONBOARDING_ICON_COLOR}>
+              <Text as="span" variant="body" color={iconColor}>
                 <Trans>Pearpass</Trans>
               </Text>
               <Text as="span" variant="body">
@@ -117,11 +117,11 @@ export const Step2Dialog = ({ onNext }: Step2Props) => {
                 <Trans>2. Go to</Trans>
               </Text>
               <Settings
-                color={ONBOARDING_ICON_COLOR}
+                color={iconColor}
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
-              <Text as="span" variant="body" color={ONBOARDING_ICON_COLOR}>
+              <Text as="span" variant="body" color={iconColor}>
                 <Trans>Settings → Syncing → Your Devices.</Trans>
               </Text>
             </div>
@@ -130,11 +130,11 @@ export const Step2Dialog = ({ onNext }: Step2Props) => {
                 <Trans>3. Click on</Trans>
               </Text>
               <Swap
-                color={ONBOARDING_ICON_COLOR}
+                color={iconColor}
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
-              <Text as="span" variant="body" color={ONBOARDING_ICON_COLOR}>
+              <Text as="span" variant="body" color={iconColor}>
                 <Trans>Generate Pair Code for Browser Extension</Trans>
               </Text>
               <Text as="span" variant="body">

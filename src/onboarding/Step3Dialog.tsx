@@ -4,16 +4,16 @@ import {
   Button,
   Title,
   Text,
-  DialogSurface
+  DialogSurface,
+  useTheme
 } from '@tetherto/pearpass-lib-ui-kit'
 import { DoneAll } from '@tetherto/pearpass-lib-ui-kit/icons'
-import {
-  ONBOARDING_DIALOG_HEIGHT,
-  ONBOARDING_ICON_COLOR,
-  ONBOARDING_ICON_SIZE
-} from './constants'
+import { ONBOARDING_DIALOG_HEIGHT, ONBOARDING_ICON_SIZE } from './constants'
 
 export const Step3Dialog = () => {
+  const { theme } = useTheme()
+  const iconColor = theme.colors.colorPrimary
+
   const handleNext = () => {
     // todo: does it work aslo in other browsers like firefox? safari?
     if (
@@ -64,31 +64,31 @@ export const Step3Dialog = () => {
             </Text>
             <div className="flex items-center justify-center gap-1">
               <DoneAll
-                color={ONBOARDING_ICON_COLOR}
+                color={iconColor}
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
-              <Text as="span" variant="body" color={ONBOARDING_ICON_COLOR}>
+              <Text as="span" variant="body" color={iconColor}>
                 <Trans>Browser connected</Trans>
               </Text>
             </div>
             <div className="flex items-center justify-center gap-1">
               <DoneAll
-                color={ONBOARDING_ICON_COLOR}
+                color={iconColor}
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
-              <Text as="span" variant="body" color={ONBOARDING_ICON_COLOR}>
+              <Text as="span" variant="body" color={iconColor}>
                 <Trans>Sync activated</Trans>
               </Text>
             </div>
             <div className="flex items-center justify-center gap-1">
               <DoneAll
-                color={ONBOARDING_ICON_COLOR}
+                color={iconColor}
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
-              <Text as="span" variant="body" color={ONBOARDING_ICON_COLOR}>
+              <Text as="span" variant="body" color={iconColor}>
                 <Trans>Autofill enabled</Trans>
               </Text>
             </div>

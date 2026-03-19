@@ -4,13 +4,10 @@ import {
   Button,
   Title,
   Text,
-  DialogSurface
+  DialogSurface,
+  useTheme
 } from '@tetherto/pearpass-lib-ui-kit'
-import {
-  ONBOARDING_DIALOG_HEIGHT,
-  ONBOARDING_ICON_COLOR,
-  ONBOARDING_ICON_SIZE
-} from './constants'
+import { ONBOARDING_DIALOG_HEIGHT, ONBOARDING_ICON_SIZE } from './constants'
 import { Extension, PushPin } from '@tetherto/pearpass-lib-ui-kit/icons'
 
 interface Step1Props {
@@ -18,6 +15,9 @@ interface Step1Props {
 }
 
 export const Step1Dialog = ({ onNext }: Step1Props) => {
+  const { theme } = useTheme()
+  const iconColor = theme.colors.colorPrimary
+
   const footer = (
     <div className="flex w-full items-center justify-end gap-3">
       <Button variant="secondary" size="medium" onClick={onNext}>
@@ -69,7 +69,7 @@ export const Step1Dialog = ({ onNext }: Step1Props) => {
                 <Trans>1. Click a</Trans>
               </Text>
               <Extension
-                color={ONBOARDING_ICON_COLOR}
+                color={iconColor}
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
@@ -82,7 +82,7 @@ export const Step1Dialog = ({ onNext }: Step1Props) => {
                 <Trans>2. Click</Trans>
               </Text>
               <PushPin
-                color={ONBOARDING_ICON_COLOR}
+                color={iconColor}
                 width={ONBOARDING_ICON_SIZE}
                 height={ONBOARDING_ICON_SIZE}
               />
