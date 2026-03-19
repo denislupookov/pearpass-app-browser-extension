@@ -1,5 +1,5 @@
 import './nativeMessaging' // Initialize native messaging handler
-import { DESIGN_VERSION } from 'pearpass-lib-constants'
+import { DESIGN_VERSION } from '@tetherto/pearpass-lib-constants'
 
 import { ensureClientKeypairUnlocked } from './clientKeyStore'
 import { MESSAGES, ALARMS } from './constants'

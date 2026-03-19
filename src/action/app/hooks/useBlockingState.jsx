@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
 
-import { DESIGN_VERSION } from 'pearpass-lib-constants'
+import { DESIGN_VERSION } from '@tetherto/pearpass-lib-constants'
 
 import { client } from '../../../shared/client'
 import {
