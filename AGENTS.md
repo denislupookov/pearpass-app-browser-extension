@@ -32,7 +32,7 @@ Before creating a file, glob the directory for the base name without the suffix.
 1. **Check the catalog below before creating any component.** If it exists in the kit, use it — never wrap or reimplement.
 2. **All new UI goes through the kit.** Any new `.tsx`/`.jsx` file — suffixed or not — must import from `@tetherto/pearpass-lib-ui-kit`, not from [src/shared/components/](src/shared/components/).
 3. **Never add variants under [src/shared/components/](src/shared/components/)** (`ButtonPrimary`, `ButtonSecondary`, `ButtonRoundIcon`, `ButtonFilter`, `ButtonFolder`, `ButtonCreate`, `ButtonLittle`, `ButtonSingleInput`, `ButtonPlusCreateNew`, `InputPearPass`, `InputPasswordPearPass`, `InputField`, `InputFieldPassword`, `InputSearch`, etc.). That tree is legacy; the kit's `Button` takes variants.
-4. **Style with tokens.** Use `useTheme()` + `rawTokens`. No hardcoded hex colors or px spacing.
+4. **Style with Tailwind utilities mapped to kit tokens** — `bg-surface-primary`, `text-text-primary`, `border-border-primary`, etc. Use `useTheme()` / `rawTokens` only when a value is needed in JS. No hardcoded hex colors or px spacing for design-system values.
 5. **Icons come from the kit.** `@tetherto/pearpass-lib-ui-kit/icons` has 133 icons. Do not add new SVGs under `src/`.
 6. **If the kit lacks something you need, stop and ask the user.** Don't silently roll a custom component.
 
@@ -134,7 +134,30 @@ The deprecated props still work for now but will be removed.
 
 **Exception:** `SearchField` still uses `onChangeText` + `placeholderText` — those aren't deprecated there. `testID` is current everywhere.
 
-## Theming
+## Styling
+
+New UI is styled with **Tailwind utility classes**. The kit ships `@tetherto/pearpass-lib-ui-kit/tailwind.css` (already imported in [src/index.css](src/index.css)), which registers its color tokens with Tailwind v4's `@theme inline`. Standard utilities like `bg-surface-primary`, `text-text-primary`, `border-border-primary` therefore resolve against the design system and follow `data-theme` switches automatically. Tailwind is enabled in every UI build via the `@tailwindcss/vite` plugin in [vite.config.main.js](vite.config.main.js).
+
+**Prefer Tailwind classes for layout and static styling.** Reach for `useTheme()` / `rawTokens` only when a value has to come from JS (e.g. a kit-component prop that takes a number, or a computed style).
+
+```tsx
+<div className="bg-surface-primary border border-border-primary rounded-[8px] p-[24px] gap-[12px]">
+  <Text className="text-text-primary">…</Text>
+</div>
+```
+
+### Kit color classes (from the kit's `tailwind.css`)
+
+Usable with `bg-*`, `text-*`, `border-*` prefixes:
+
+- **Surfaces:** `background`, `surface-primary`, `surface-hover`, `surface-secondary`, `surface-elevated-on-interaction`, `surface-disabled`, `surface-destructive`, `surface-destructive-elevated`, `surface-error`, `surface-warning`, `surface-search-field`
+- **Accents:** `primary`, `secondary`, `accent-hover`, `accent-active`, `focus-ring`, `on-primary`
+- **Text (use with `text-*`):** `text-primary`, `text-secondary`, `text-tertiary`, `text-disabled`, `text-search-field`, `link-text` — note these are the full token names, so the utility class is e.g. `text-text-primary`, `text-link-text`
+- **Borders (use with `border-*`):** `border-primary`, `border-secondary`, `border-search-field` — utility is e.g. `border-border-primary`
+
+### Spacing / radius / font-size aren't auto-generated Tailwind utilities
+
+The kit registers only **color** tokens with `@theme inline`. Spacing (`--spacing2` … `--spacing48`), radius (`--radius8` … `--radius26`), and font-size (`--font-size12` … `--font-size28`) live on `:root` as CSS vars but don't produce Tailwind utility classes. Use them as arbitrary values — `p-[var(--spacing24)]`, `rounded-[var(--radius8)]`, `text-[var(--font-size14)]` — or pull from `rawTokens` in JS when needed.
 
 ### `rawTokens` — flat, numeric-suffixed keys (not nested)
 
@@ -183,7 +206,7 @@ When creating new UI or touching a v2 file, do **not**:
 - Use native `<button>`, `<input>`, or `<dialog>` in production code (tests are fine).
 - Hardcode hex colors, brand radii, or design-system spacing — use `rawTokens` and `theme.colors`. (Feature-specific layout literals like `maxWidth: '500px'` are fine.)
 - Add new SVG files under `src/` when the kit's icons subpath covers them.
-- Introduce `styled-components` — the convention is `createStyles(colors)` returning plain style objects. (`styled-components` is still in `package.json` but is not used in `src/`; keep it that way.)
+- Introduce `styled-components`. Style with Tailwind utilities (plus `rawTokens` in JS when needed). `styled-components` is still in `package.json` but not used in `src/` — keep it that way.
 
 When editing a v1 file and you spot these patterns, mention them to the user but **don't do drive-by rewrites** unless asked — v1 migration is scoped work.
 
