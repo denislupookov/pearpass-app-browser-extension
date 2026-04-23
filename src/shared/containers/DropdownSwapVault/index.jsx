@@ -7,7 +7,9 @@ import { useModal } from '../../context/ModalContext'
 import { ArrowDownIcon } from '../../icons/ArrowDownIcon'
 import { LockCircleIcon } from '../../icons/LockCircleIcon'
 import { LockIcon } from '../../icons/LockIcon'
+import { isV2 } from '../../utils/designVersion'
 import { logger } from '../../utils/logger'
+import { CreateOrEditVaultModalContentV2 } from '../CreateOrEditVaultModalContentV2'
 import { CreateVaultModalContent } from '../CreateVaultModalContent'
 import { VaultPasswordFormModalContent } from '../VaultPasswordFormModalContent'
 
@@ -112,7 +114,14 @@ export const DropdownSwapVault = ({
     setIsOpen(false)
 
     setModal(
-      <CreateVaultModalContent onClose={closeModal} onSuccess={closeModal} />
+      isV2() ? (
+        <CreateOrEditVaultModalContentV2
+          onClose={closeModal}
+          onSuccess={closeModal}
+        />
+      ) : (
+        <CreateVaultModalContent onClose={closeModal} onSuccess={closeModal} />
+      )
     )
   }
 
