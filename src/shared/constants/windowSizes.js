@@ -6,6 +6,6 @@ export const passkeyWindowSize = {
 }
 
 export const mainExtensionWindowSize = {
-  width: isV2 ? 650 : 600,
-  height: isV2 ? 494 : 455
+  width: isV2() ? 650 : 600,
+  height: isV2() ? 494 : 455
 }
