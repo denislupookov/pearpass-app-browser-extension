@@ -2,7 +2,14 @@ import type { MouseEvent } from 'react'
 import { useMemo, useState } from 'react'
 
 import { t } from '@lingui/core/macro'
-import { useFolders, useRecordCountsByType } from '@tetherto/pearpass-lib-vault'
+import { AUTHENTICATOR_ENABLED } from '@tetherto/pearpass-lib-constants'
+import {
+  closeAllInstances,
+  useFolders,
+  useRecordCountsByType,
+  useVault,
+  useVaults
+} from '@tetherto/pearpass-lib-vault'
 import {
   Button,
   ContextMenu,
@@ -20,11 +27,13 @@ import {
   FolderCopy,
   KeyboardArrowLeftFilled,
   LockFilled,
+  LockOutlined,
+  SettingsOutlined,
   StarBorder,
   StarFilled,
-  TrashOutlined
+  TrashOutlined,
+  TwoFactorAuthenticationOutlined
 } from '@tetherto/pearpass-lib-ui-kit/icons'
-import { useVault } from '@tetherto/pearpass-lib-vault'
 
 import {
   createStyles,
@@ -32,12 +41,14 @@ import {
   FOLDERS_CHEVRON_CENTER_SHIFT_PX
 } from './SidebarV2.styles'
 import { VaultSelector } from './VaultSelector'
-import { ConfirmationModalContent } from '../ConfirmationModalContent'
-import { CreateFolderModalContent } from '../CreateFolderModalContent'
+import { NAVIGATION_ROUTES } from '../../constants/navigation'
+import { useLoadingContext } from '../../context/LoadingContext'
 import { useModal } from '../../context/ModalContext'
 import { useRouter } from '../../context/RouterContext'
 import { useRecordMenuItemsV2 } from '../../hooks/useRecordMenuItemsV2'
 import { sortByName } from '../../utils/sortByName'
+import { ConfirmationModalContent } from '../ConfirmationModalContent'
+import { CreateFolderModalContent } from '../CreateFolderModalContent'
 
 const FAVORITES_FOLDER_ID = 'favorites'
 
@@ -62,6 +73,8 @@ export const SidebarV2 = () => {
   const { data: vaultData } = useVault()
   const { data: foldersData, deleteFolder } = useFolders()
   const { data: recordCounts } = useRecordCountsByType()
+  const { resetState } = useVaults()
+  const { setIsLoading } = useLoadingContext()
   const { setModal, closeModal } = useModal()
 
   const { categoriesItems } = useRecordMenuItemsV2()
@@ -128,6 +141,27 @@ export const SidebarV2 = () => {
         }}
       />
     )
+  }
+
+  const handleAuthenticatorClick = () => {
+    navigate('authenticator', { params: {} })
+  }
+
+  const handleSettingsClick = () => {
+    navigate('settings', { params: {} })
+  }
+
+  const handleLockApp = async () => {
+    setIsLoading(true)
+    try {
+      await closeAllInstances()
+      navigate('welcome', {
+        params: { state: NAVIGATION_ROUTES.MASTER_PASSWORD }
+      })
+      resetState()
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleDeleteFolder = (folderName: string, count: number) => {
@@ -376,6 +410,42 @@ export const SidebarV2 = () => {
           )}
         </div>
         <div style={styles.fadeGradient} aria-hidden="true" />
+      </div>
+
+      {AUTHENTICATOR_ENABLED && (
+        <div style={styles.footerSection}>
+          <NavbarListItem
+            testID="sidebar-authenticator"
+            label={t`Authenticator`}
+            size="small"
+            variant="default"
+            icon={
+              <TwoFactorAuthenticationOutlined
+                color={theme.colors.colorTextPrimary}
+              />
+            }
+            onClick={handleAuthenticatorClick}
+          />
+        </div>
+      )}
+
+      <div style={styles.footerSection}>
+        <NavbarListItem
+          testID="sidebar-settings-button"
+          label={t`Settings`}
+          size="small"
+          variant="default"
+          icon={<SettingsOutlined color={theme.colors.colorTextPrimary} />}
+          onClick={handleSettingsClick}
+        />
+        <NavbarListItem
+          testID="sidebar-lock-app"
+          label={t`Lock App`}
+          size="small"
+          variant="default"
+          icon={<LockOutlined color={theme.colors.colorTextPrimary} />}
+          onClick={handleLockApp}
+        />
       </div>
     </aside>
   )
