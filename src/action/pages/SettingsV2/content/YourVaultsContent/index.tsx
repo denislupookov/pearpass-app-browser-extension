@@ -215,7 +215,7 @@ export const YourVaultsContent = () => {
               key={v.id}
               className={
                 index < otherVaults.length - 1
-                  ? 'border-b border-border-primary'
+                  ? 'border-border-primary border-b'
                   : ''
               }
             >

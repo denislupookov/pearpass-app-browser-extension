@@ -75,7 +75,7 @@ export const AddDeviceModalContent = () => {
           {t`Access Code`}
         </Text>
         <div className="bg-surface-primary border-border-primary box-border flex flex-col items-stretch rounded-[8px] border">
-          <div className="mb-[16px] mt-[24px] flex items-center justify-center">
+          <div className="mt-[24px] mb-[16px] flex items-center justify-center">
             <div
               className="bg-surface-hover box-border flex h-[160px] w-[160px] items-center justify-center rounded-[8px] p-[10px]"
               dangerouslySetInnerHTML={{ __html: qrSvg }}
@@ -102,7 +102,7 @@ export const AddDeviceModalContent = () => {
                 {t`Vault Link`}
               </Text>
               <div
-                className="block min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                className="block max-w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
                 title={data?.publicKey ?? ''}
               >
                 <Text as="span" variant="label" color={colors.colorTextPrimary}>
