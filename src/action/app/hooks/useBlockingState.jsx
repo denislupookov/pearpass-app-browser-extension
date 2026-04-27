@@ -10,9 +10,11 @@ import { NAVIGATION_ROUTES } from '../../../shared/constants/navigation'
 import { useModal } from '../../../shared/context/ModalContext'
 import { useRouter } from '../../../shared/context/RouterContext'
 import { secureChannelMessages } from '../../../shared/services/messageBridge'
+import { isV2 } from '../../../shared/utils/designVersion'
 import { logger } from '../../../shared/utils/logger'
 import { DesktopConnectionModalContent } from '../../containers/Modal/DesktopConnectionModalContent'
 import { PairingRequiredModalContent } from '../../containers/Modal/PairingRequiredModalContent'
+import { PairingRequiredModalContentV2 } from '../../containers/Modal/PairingRequiredModalContent/PairingRequiredModalContentV2'
 
 /**
  * Hook to check blocking state on extension open and reactively handle
@@ -39,7 +41,16 @@ export const useBlockingState = () => {
     if (pairingModalOpenRef.current) return
     pairingModalOpenRef.current = true
     closeAllModals()
-    setModal(<PairingRequiredModalContent onPairSuccess={onPairSuccess} />, {
+
+    const content = isV2() ? (
+      <PairingRequiredModalContentV2 onPairSuccess={onPairSuccess} />
+    ) : (
+      // TODO: Remove this component once version 2 is the only supported version.
+      <PairingRequiredModalContent onPairSuccess={onPairSuccess} />
+    )
+
+    setModal(content, {
+      fullScreen: isV2(),
       closeable: false
     })
   }, [closeAllModals, setModal, onPairSuccess])

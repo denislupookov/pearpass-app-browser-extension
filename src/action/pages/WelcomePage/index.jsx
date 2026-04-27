@@ -1,5 +1,6 @@
 import { CreateNewVault } from './CreateNewVault'
 import { EnterMasterPassword } from './EnterMasterPassword'
+import { EnterMasterPasswordV2 } from './EnterMasterPassword/EnterMasterPasswordV2'
 import { LoadVault } from './LoadVault'
 import { LockedScreen } from './LockedScreen'
 import { SelectOrLoadVault } from './SelectOrLoadVault'
@@ -7,11 +8,21 @@ import { UnlockVault } from './UnlockVault'
 import { WelcomePageWrapper } from '../../../shared/components/WelcomePageWrapper'
 import { NAVIGATION_ROUTES } from '../../../shared/constants/navigation'
 import { useRouter } from '../../../shared/context/RouterContext'
+import { isV2 } from '../../../shared/utils/designVersion'
 
 export const WelcomePage = () => {
   const { params } = useRouter()
 
-  return <WelcomePageWrapper>{renderPage(params.state)}</WelcomePageWrapper>
+  if (params.state === NAVIGATION_ROUTES.MASTER_PASSWORD && isV2()) {
+    return <EnterMasterPasswordV2 />
+  }
+
+  const page = renderPage(params.state)
+  if (!page) {
+    return <div className="bg-surface-primary h-full w-full" />
+  }
+
+  return <WelcomePageWrapper>{page}</WelcomePageWrapper>
 }
 
 const renderPage = (state) => {
