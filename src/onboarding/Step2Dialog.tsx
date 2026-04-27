@@ -7,15 +7,16 @@ import {
   Text,
   InputField,
   AlertMessage,
-  DialogSurface,
+  Panel,
   useTheme
 } from '@tetherto/pearpass-lib-ui-kit'
-import { ONBOARDING_DIALOG_HEIGHT, ONBOARDING_ICON_SIZE } from './constants'
+import { ONBOARDING_ICON_SIZE } from './constants'
 import { secureChannelMessages } from '../shared/services/messageBridge'
+import { pendingPairingStore } from '../shared/services/pendingPairingStore'
 import {
   PearpassLogo,
   Settings,
-  Swap
+  SwapVert
 } from '@tetherto/pearpass-lib-ui-kit/icons'
 
 interface Step2Props {
@@ -24,25 +25,25 @@ interface Step2Props {
 
 export const Step2Dialog = ({ onNext }: Step2Props) => {
   const { theme } = useTheme()
-  const iconColor = theme.colors.colorPrimary
+  const accentColor = theme.colors.colorLinkText
 
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const handleConnect = async () => {
+    const trimmed = code.trim()
     try {
-      console.log('Sending token:', code)
-      const res = await secureChannelMessages.getIdentity(code.trim())
-      console.log('Identity response:', res)
+      const res = await secureChannelMessages.getIdentity(trimmed)
       if (res?.success) {
-        // todo: could this have some security implications?
-        localStorage.setItem('PendingPairingToken', code.trim())
+        await pendingPairingStore.set(trimmed)
         onNext()
       } else {
+        await pendingPairingStore.clear()
         setError(t`Failed to get identity. Please try again.`)
       }
     } catch (err: unknown) {
       console.error('Failed to get identity:', err)
+      await pendingPairingStore.clear()
       let errorMessage = t`An unknown error occurred`
       if (typeof err === 'string') {
         errorMessage = err
@@ -53,119 +54,120 @@ export const Step2Dialog = ({ onNext }: Step2Props) => {
     }
   }
 
-  const footer = (
-    <div className="flex w-full items-center justify-end">
-      <Button
-        variant="primary"
-        size="medium"
-        onClick={handleConnect}
-        disabled={!code.trim()}
-      >
-        <Trans>Connect Browser</Trans>
-      </Button>
-    </div>
-  )
-
   return (
-    <DialogSurface
+    <Panel
       title={<Trans>Step 2 of 3</Trans>}
-      footer={footer}
-      hideCloseButton
-      style={
-        {
-          width: '100%',
-          maxWidth: '100%',
-          minHeight: ONBOARDING_DIALOG_HEIGHT
-        } as any
+      footer={
+        <div className="flex w-full items-center justify-end">
+          <Button
+            variant="primary"
+            size="medium"
+            onClick={handleConnect}
+            disabled={!code.trim()}
+            data-testid="onboarding-step2-connect-button"
+          >
+            <Trans>Connect Browser</Trans>
+          </Button>
+        </div>
       }
+      hideCloseButton
+      testID="onboarding-step2-dialog"
     >
-      <div className="flex flex-col gap-4">
-        <img
-          src="/assets/images/step2.png"
-          className="mx-auto my-6 block"
-          alt="Step 2"
-        />
-        <div className="flex flex-col items-center gap-4 text-center">
-          <Title as="h2">
-            <Trans>Connect this browser to Pearpass</Trans>
-          </Title>
-          <div className="flex flex-col gap-2">
-            <Text as="p" variant="body">
-              <Trans>
-                Pearpass doesn't use accounts. To connect this browser you will
-                pair it with the Pearpass app using a one-time code.
-              </Trans>
-            </Text>
-            <div className="flex items-center justify-center gap-1">
-              <Text as="span" variant="body">
-                <Trans>1. Open the</Trans>
+      <div className="flex flex-col gap-[var(--spacing24)] px-[var(--spacing8)] py-[var(--spacing24)]">
+        <div className="bg-surface-hover border-border-primary relative h-[200px] w-full overflow-hidden rounded-lg border">
+          <img
+            src="/assets/images/step2.svg"
+            className="h-full w-full object-cover"
+            alt="Step 2"
+          />
+        </div>
+
+        <div className="flex flex-col gap-[var(--spacing16)]">
+          <div className="flex flex-col items-center gap-[var(--spacing16)] text-center">
+            <Title as="h2">
+              <Trans>Connect This Browser to PearPass</Trans>
+            </Title>
+            <div className="flex flex-col gap-[var(--spacing12)]">
+              <Text as="p">
+                <Trans>
+                  PearPass doesn't use accounts. To connect this browser, you'll
+                  pair it with the PearPass app using a one-time code.
+                </Trans>
               </Text>
-              <PearpassLogo
-                color={iconColor}
-                width={ONBOARDING_ICON_SIZE}
-                height={ONBOARDING_ICON_SIZE}
-              />
-              <Text as="span" variant="body" color={iconColor}>
-                <Trans>Pearpass</Trans>
-              </Text>
-              <Text as="span" variant="body">
-                <Trans>app.</Trans>
-              </Text>
-            </div>
-            <div className="flex items-center justify-center gap-1">
-              <Text as="span" variant="body">
-                <Trans>2. Go to</Trans>
-              </Text>
-              <Settings
-                color={iconColor}
-                width={ONBOARDING_ICON_SIZE}
-                height={ONBOARDING_ICON_SIZE}
-              />
-              <Text as="span" variant="body" color={iconColor}>
-                <Trans>Settings → Syncing → Your Devices.</Trans>
-              </Text>
-            </div>
-            <div className="flex items-center justify-center gap-1">
-              <Text as="span" variant="body">
-                <Trans>3. Click on</Trans>
-              </Text>
-              <Swap
-                color={iconColor}
-                width={ONBOARDING_ICON_SIZE}
-                height={ONBOARDING_ICON_SIZE}
-              />
-              <Text as="span" variant="body" color={iconColor}>
-                <Trans>Generate Pair Code for Browser Extension</Trans>
-              </Text>
-              <Text as="span" variant="body">
-                {' '}
-                <Trans>&amp; Enter Code Below</Trans>
-              </Text>
-            </div>
-          </div>
-          <div className="w-full text-left">
-            <InputField
-              label={t`One-time code`}
-              value={code}
-              placeholderText={t`Enter your one-time code`}
-              onChangeText={(val) => {
-                setCode(val)
-                setError(null)
-              }}
-            />
-            {error && (
-              <div className="mt-4">
-                <AlertMessage
-                  variant="error"
-                  size="small"
-                  title={t`Error`}
-                  description={error}
-                />
+              <div className="flex flex-col gap-[var(--spacing8)]">
+                <div className="flex items-center justify-center gap-[var(--spacing4)]">
+                  <Text as="span" noWrap>
+                    <Trans>1. Open the</Trans>
+                  </Text>
+                  <PearpassLogo
+                    color={accentColor}
+                    width={ONBOARDING_ICON_SIZE}
+                    height={ONBOARDING_ICON_SIZE}
+                    style={{ flexShrink: 0 }}
+                  />
+                  <Text as="span" noWrap>
+                    <span style={{ color: accentColor }}>
+                      <Trans>PearPass</Trans>
+                    </span>{' '}
+                    <Trans>app</Trans>
+                  </Text>
+                </div>
+                <div className="flex items-center justify-center gap-[var(--spacing4)]">
+                  <Text as="span" noWrap>
+                    <Trans>2. Go to</Trans>
+                  </Text>
+                  <Settings
+                    color={accentColor}
+                    width={ONBOARDING_ICON_SIZE}
+                    height={ONBOARDING_ICON_SIZE}
+                    style={{ flexShrink: 0 }}
+                  />
+                  <Text as="span" color={accentColor} noWrap>
+                    <Trans>Settings → Syncing → Your Devices</Trans>
+                  </Text>
+                </div>
+                <div className="flex items-center justify-center gap-[var(--spacing4)]">
+                  <Text as="span" noWrap>
+                    <Trans>3. Click on</Trans>
+                  </Text>
+                  <SwapVert
+                    color={accentColor}
+                    width={ONBOARDING_ICON_SIZE}
+                    height={ONBOARDING_ICON_SIZE}
+                    style={{ flexShrink: 0 }}
+                  />
+                  <Text as="span" noWrap>
+                    <span style={{ color: accentColor }}>
+                      <Trans>Generate Pair Code for Browser Extension</Trans>
+                    </span>
+                    {' & Enter Code Below'}
+                  </Text>
+                </div>
               </div>
-            )}
+            </div>
           </div>
+
+          <InputField
+            label={t`Browser Extension Pair Code`}
+            value={code}
+            placeholder={t`Enter Your Pair Code`}
+            onChange={(e) => {
+              setCode(e.target.value)
+              setError(null)
+            }}
+            testID="onboarding-step2-code-input"
+          />
+          {error && (
+            <AlertMessage
+              variant="error"
+              size="small"
+              title={t`Error`}
+              description={error}
+              testID="onboarding-step2-error"
+            />
+          )}
         </div>
       </div>
-    </DialogSurface>
+    </Panel>
   )
 }

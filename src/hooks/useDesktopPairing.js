@@ -1,6 +1,6 @@
 // useDesktopPairing.js
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { t } from '@lingui/core/macro'
 import { useUserData, useVaults } from '@tetherto/pearpass-lib-vault'
@@ -9,6 +9,7 @@ import { AUTH_ERROR_PATTERNS } from '../shared/constants/auth'
 import { PAIRING_ERROR_PATTERNS } from '../shared/constants/nativeMessaging'
 import { useToast } from '../shared/context/ToastContext'
 import { secureChannelMessages } from '../shared/services/messageBridge'
+import { pendingPairingStore } from '../shared/services/pendingPairingStore'
 import { logger } from '../shared/utils/logger'
 
 export const PAIRING_STEP = {
@@ -38,7 +39,13 @@ const PAIRING_ERROR_MESSAGES = {
  * @returns {Function} returns.fetchIdentity - Fetches and verifies desktop identity using the pairing token
  * @returns {Function} returns.completePairing - Completes the pairing process with the provided password
  */
-export const useDesktopPairing = ({ onPairSuccess, handleBack, setStep }) => {
+export const useDesktopPairing = ({
+  onPairSuccess,
+  handleBack,
+  setStep,
+  showVerifiedToast = true,
+  hydrateFromStore = false
+}) => {
   const { setToast } = useToast()
   const { logIn } = useUserData()
   const { initVaults } = useVaults()
@@ -46,6 +53,24 @@ export const useDesktopPairing = ({ onPairSuccess, handleBack, setStep }) => {
   const [identity, setIdentity] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    if (!hydrateFromStore) {
+      setHydrated(true)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      const token = await pendingPairingStore.get()
+      if (cancelled) return
+      if (token) setPairingToken(token)
+      setHydrated(true)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [hydrateFromStore])
 
   /**
    * Fetches and validates the desktop identity using the pairing token
@@ -66,9 +91,11 @@ export const useDesktopPairing = ({ onPairSuccess, handleBack, setStep }) => {
       if (res?.success && res?.identity) {
         setIdentity(res.identity)
         setStep(PAIRING_STEP.PASSWORD)
-        setToast({
-          message: t`Desktop verified! Enter your master password to complete.`
-        })
+        if (showVerifiedToast) {
+          setToast({
+            message: t`Desktop verified! Enter your master password to complete.`
+          })
+        }
       } else if (
         res?.error?.includes(PAIRING_ERROR_PATTERNS.INVALID_PAIRING_TOKEN)
       ) {
@@ -78,6 +105,7 @@ export const useDesktopPairing = ({ onPairSuccess, handleBack, setStep }) => {
       }
     } catch (error) {
       logger.error('Failed to fetch identity:', error)
+      void pendingPairingStore.clear()
       const message =
         error.message ||
         (error.code === 'TIMEOUT'
@@ -184,6 +212,7 @@ export const useDesktopPairing = ({ onPairSuccess, handleBack, setStep }) => {
     await logIn({ password })
     await initVaults({ password })
 
+    await pendingPairingStore.clear()
     setToast({ message: t`Paired successfully!` })
     onPairSuccess()
   }
@@ -231,6 +260,7 @@ export const useDesktopPairing = ({ onPairSuccess, handleBack, setStep }) => {
     identity,
     loading,
     error,
+    hydrated,
     fetchIdentity,
     completePairing
   }

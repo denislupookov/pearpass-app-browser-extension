@@ -50,7 +50,7 @@ export const Logo = () => {
       onClick={handleClick}
     >
       <div className="relative">
-        <LogoLock width="14" height="20" />
+        <LogoLock width="100%" height="100%" />
 
         {!!count && (
           <div className="bg-black-mode1 font-inter text-white-mode1 absolute bottom-[1px] left-[50%] flex h-[10px] w-[10px] -translate-x-[50%] items-center justify-center rounded-full text-[8px] font-bold">

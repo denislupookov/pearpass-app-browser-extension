@@ -9,18 +9,7 @@ export const StepIndicatorBar = ({
   currentStep,
   totalSteps
 }: StepIndicatorBarProps) => (
-  <div
-    style={{
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      padding: 0,
-      gap: '6px',
-      width: '100%',
-      maxWidth: '100%',
-      height: '2px'
-    }}
-  >
+  <div className="flex h-[var(--spacing2)] w-full flex-row items-start gap-[var(--spacing6)]">
     {Array.from({ length: totalSteps }, (_, i) => {
       const step = i + 1
       const isActive = step <= currentStep
@@ -28,13 +17,9 @@ export const StepIndicatorBar = ({
       return (
         <div
           key={step}
-          style={{
-            flexGrow: 1,
-            height: '2px',
-            background: '#FFFFFF',
-            opacity: isActive ? 1 : 0.2,
-            borderRadius: '100px'
-          }}
+          className={`bg-text-primary h-[var(--spacing2)] flex-grow rounded-full ${
+            isActive ? 'opacity-100' : 'opacity-20'
+          }`}
         />
       )
     })}

@@ -4,6 +4,8 @@ export interface UseDesktopPairingParams {
   onPairSuccess: () => void
   handleBack: () => void
   setStep: (step: string) => void
+  showVerifiedToast?: boolean
+  hydrateFromStore?: boolean
 }
 
 export interface UseDesktopPairingReturn {
@@ -14,6 +16,7 @@ export interface UseDesktopPairingReturn {
   fetchIdentity: () => Promise<void>
   completePairing: (password: string) => Promise<void>
   error: string | null
+  hydrated: boolean
 }
 
 export declare const PAIRING_STEP: {
