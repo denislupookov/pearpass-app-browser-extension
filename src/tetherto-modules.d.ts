@@ -229,3 +229,40 @@ declare module '@tetherto/pearpass-lib-vault' {
   export const useRecords: any
   export const useBlindMirrors: any
 }
+
+declare module '@tetherto/pearpass-utils-password-generator' {
+  export function generatePassphrase(
+    capitalLetters: boolean,
+    symbols: boolean,
+    numbers: boolean,
+    words: number
+  ): string[]
+
+  export function generatePassword(
+    length: number,
+    rulesConfig?: {
+      includeSpecialChars?: boolean
+      lowerCase?: boolean
+      upperCase?: boolean
+      numbers?: boolean
+    }
+  ): string
+}
+
+declare module '@tetherto/pearpass-utils-password-check' {
+  export const PASSWORD_STRENGTH: {
+    WEAK: string
+    VULNERABLE: string
+    SAFE: string
+  }
+  export function checkPassphraseStrength(
+    words: string[],
+    config?: unknown
+  ): { type: string; [key: string]: unknown }
+  export function checkPasswordStrength(
+    password: string,
+    config?: unknown
+  ): { type: string; [key: string]: unknown }
+  export const constantTimeHashCompare: unknown
+  export const validatePasswordChange: unknown
+}

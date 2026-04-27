@@ -1,3 +1,5 @@
+import './utils/contentI18n.js'
+
 import { generateUniqueId } from '@tetherto/pear-apps-utils-generate-unique-id'
 import { SAVE_CREDENTIALS_AFTER_LOGIN_ENABLED } from '@tetherto/pearpass-lib-constants'
 import { RECORD_TYPES } from '@tetherto/pearpass-lib-vault'
@@ -12,6 +14,7 @@ import { isContentScriptEnabled } from './utils/isContentScriptEnabled'
 import { isIdentityField } from './utils/isIdentityField'
 import { isPasswordField } from './utils/isPasswordField'
 import { isUsernameField } from './utils/isUsernameField'
+import { showPasswordStrengthNearField } from './utils/showPasswordStrengthNearField'
 import { triggerInputEvents } from './utils/triggerInputEvents'
 import { CONTENT_MESSAGE_TYPES } from '../shared/constants/nativeMessaging'
 import { MESSAGE_TYPES } from '../shared/services/messageBridge'
@@ -19,6 +22,7 @@ import {
   getAutofillEnabled,
   onAutofillEnabledChanged
 } from '../shared/utils/autofillSetting'
+import { isV2 } from '../shared/utils/designVersion'
 import { logger } from '../shared/utils/logger'
 import { runtime } from '../shared/utils/runtime'
 
@@ -200,6 +204,9 @@ function handleInsertPassword({ password, iframeData }) {
   if (iframeData.element) {
     iframeData.element.value = password
     triggerInputEvents(iframeData.element, ['input', 'change', 'blur'])
+    if (isV2()) {
+      showPasswordStrengthNearField(iframeData.element, password)
+    }
   }
 
   removeIframe(iframeData)

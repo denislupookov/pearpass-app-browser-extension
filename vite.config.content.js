@@ -1,32 +1,37 @@
 import path from 'path'
 
+import { lingui } from '@lingui/vite-plugin'
 import { defineConfig } from 'vite'
 import viteBabel from 'vite-plugin-babel'
 
-const webOnlyExtensions = [".web.js", ".web.jsx", ".web.ts", ".web.tsx"];
+const webOnlyExtensions = ['.web.js', '.web.jsx', '.web.ts', '.web.tsx']
 
 export default defineConfig({
   plugins: [
     viteBabel({
-      filter: /\.[jt]sx?$/,
+      babelConfig: {
+        configFile: path.resolve(__dirname, 'babel.config.cjs')
+      },
+      filter: /\.[jt]sx?$/
     }),
+    lingui()
   ],
   resolve: {
     preserveSymlinks: false,
     dedupe: ['react', 'react-dom'],
     extensions: [
       ...webOnlyExtensions,
-      ".mjs",
-      ".js",
-      ".mts",
-      ".ts",
-      ".jsx",
-      ".tsx",
-      ".json",
+      '.mjs',
+      '.js',
+      '.mts',
+      '.ts',
+      '.jsx',
+      '.tsx',
+      '.json'
     ]
   },
   optimizeDeps: {
-    exclude: ['@tetherto/pearpass-lib-ui-kit', 'react-strict-dom'],
+    exclude: ['@tetherto/pearpass-lib-ui-kit', 'react-strict-dom']
   },
   ssr: {
     noExternal: ['react-strict-dom']
