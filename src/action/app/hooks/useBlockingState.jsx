@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
 
-import { DESIGN_VERSION } from '@tetherto/pearpass-lib-constants'
-
 import { client } from '../../../shared/client'
 import {
   BACKGROUND_MESSAGE_TYPES,
@@ -12,6 +10,7 @@ import { NAVIGATION_ROUTES } from '../../../shared/constants/navigation'
 import { useModal } from '../../../shared/context/ModalContext'
 import { useRouter } from '../../../shared/context/RouterContext'
 import { secureChannelMessages } from '../../../shared/services/messageBridge'
+import { isV2 } from '../../../shared/utils/designVersion'
 import { logger } from '../../../shared/utils/logger'
 import { DesktopConnectionModalContent } from '../../containers/Modal/DesktopConnectionModalContent'
 import { PairingRequiredModalContent } from '../../containers/Modal/PairingRequiredModalContent'
@@ -43,16 +42,15 @@ export const useBlockingState = () => {
     pairingModalOpenRef.current = true
     closeAllModals()
 
-    const content =
-      DESIGN_VERSION === 2 ? (
-        <PairingRequiredModalContentV2 onPairSuccess={onPairSuccess} />
-      ) : (
-        // TODO: Remove this component once version 2 is the only supported version.
-        <PairingRequiredModalContent onPairSuccess={onPairSuccess} />
-      )
+    const content = isV2() ? (
+      <PairingRequiredModalContentV2 onPairSuccess={onPairSuccess} />
+    ) : (
+      // TODO: Remove this component once version 2 is the only supported version.
+      <PairingRequiredModalContent onPairSuccess={onPairSuccess} />
+    )
 
     setModal(content, {
-      fullScreen: DESIGN_VERSION === 2,
+      fullScreen: isV2(),
       closeable: false
     })
   }, [closeAllModals, setModal, onPairSuccess])

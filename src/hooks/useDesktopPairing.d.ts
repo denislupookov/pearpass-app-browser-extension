@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-
 export interface UseDesktopPairingParams {
   onPairSuccess: () => void
   handleBack: () => void

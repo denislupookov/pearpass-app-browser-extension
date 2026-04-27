@@ -1,5 +1,4 @@
-import './nativeMessaging' // Initialize native messaging handler
-import { DESIGN_VERSION } from '@tetherto/pearpass-lib-constants'
+import './nativeMessaging'
 
 import { ensureClientKeypairUnlocked } from './clientKeyStore'
 import { MESSAGES, ALARMS } from './constants'
@@ -20,6 +19,7 @@ import {
 } from '../shared/services/messageBridge'
 import { arrayBufferToBase64Url } from '../shared/utils/arrayBufferToBase64Url'
 import { base64UrlToArrayBuffer } from '../shared/utils/base64UrlToArrayBuffer'
+import { isV2 } from '../shared/utils/designVersion'
 import { logger } from '../shared/utils/logger'
 import { runtime } from '../shared/utils/runtime'
 
@@ -29,9 +29,8 @@ const { CLEAR_CLIPBOARD } = ALARMS
 const pending = new Map()
 const conditionalPasskeyRequests = new Map()
 
-// Open onboarding page on install
 chrome.runtime.onInstalled.addListener((details) => {
-  if (DESIGN_VERSION && details.reason === 'install') {
+  if (isV2() && details.reason === 'install') {
     chrome.tabs.create({ url: chrome.runtime.getURL('onboarding.html') })
   }
 })

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, { useCallback, useState } from 'react'
 
 import { t } from '@lingui/core/macro'
