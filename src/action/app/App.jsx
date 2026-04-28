@@ -2,6 +2,7 @@ import { rawTokens, useTheme } from '@tetherto/pearpass-lib-ui-kit'
 
 import { useRedirect } from './hooks/useRedirect'
 import { useWindowResize } from './hooks/useWindowResize'
+import { Loading } from './Loading'
 import { Routes } from './Routes'
 import { FadeInWrapper } from '../../shared/components/FadeInWrapper'
 import { WelcomePageWrapper } from '../../shared/components/WelcomePageWrapper'
@@ -40,9 +41,13 @@ export const App = () => {
   return (
     <div className={containerClassName} style={containerStyle}>
       {isLoading ? (
-        <FadeInWrapper>
-          <WelcomePageWrapper />
-        </FadeInWrapper>
+        isV2() ? (
+          <Loading />
+        ) : (
+          <FadeInWrapper>
+            <WelcomePageWrapper />
+          </FadeInWrapper>
+        )
       ) : isV2() ? (
         <>
           <AppHeaderContainer />
