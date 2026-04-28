@@ -1,4 +1,4 @@
-import { rawTokens } from '@tetherto/pearpass-lib-ui-kit'
+import { rawTokens, useTheme } from '@tetherto/pearpass-lib-ui-kit'
 
 import { useRedirect } from './hooks/useRedirect'
 import { useWindowResize } from './hooks/useWindowResize'
@@ -13,6 +13,7 @@ import { AppHeaderContainer } from '../containers/AppHeaderContainer'
 export const App = () => {
   const { isChecking: isBlockingStateChecking } = useBlockingStateContext()
   const { isLoading: isRedirectLoading } = useRedirect()
+  const { theme } = useTheme()
   const windowSize = useWindowResize()
 
   const isLoading = isBlockingStateChecking || isRedirectLoading
@@ -29,7 +30,7 @@ export const App = () => {
     ...(isV2()
       ? {
           padding: '4px',
-          border: '1px solid #3D403F',
+          border: `1px solid ${theme.colors.colorBorderTertiary}`,
           borderRadius: `${rawTokens.radius8}px`,
           boxSizing: 'border-box'
         }

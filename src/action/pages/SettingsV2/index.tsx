@@ -150,7 +150,7 @@ export const SettingsV2 = () => {
         </Text>
       </header>
 
-      <div className="bg-surface-primary border-border-primary flex min-h-0 flex-1 overflow-hidden rounded-[6px] border">
+      <div className="bg-surface-primary border-border-primary flex min-h-0 flex-1 overflow-hidden rounded-[var(--radius6)] border">
         <nav
           aria-label={t`Settings sections`}
           className="border-border-primary flex h-full w-[210px] flex-none flex-col gap-[8px] overflow-y-auto border-r p-[12px]"

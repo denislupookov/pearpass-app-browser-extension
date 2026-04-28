@@ -9,7 +9,11 @@ import { createPortal } from 'react-dom'
 
 import { t } from '@lingui/core/macro'
 import { UNSUPPORTED } from '@tetherto/pearpass-lib-constants'
-import { NavbarListItem, useTheme } from '@tetherto/pearpass-lib-ui-kit'
+import {
+  NavbarListItem,
+  rawTokens,
+  useTheme
+} from '@tetherto/pearpass-lib-ui-kit'
 import {
   CheckBox,
   CopyAll,
@@ -30,9 +34,6 @@ import type { VaultRecord } from '../../../shared/utils/groupRecordsByTimePeriod
 
 export const RECORD_ROW_CONTEXT_MENU_WIDTH = 220
 const VIEWPORT_MARGIN = 8
-
-const MENU_BOX_SHADOW =
-  '0 185px 52px 0 rgba(8,10,5,0.01), 0 118px 47px 0 rgba(8,10,5,0.06), 0 67px 40px 0 rgba(8,10,5,0.20), 0 30px 30px 0 rgba(8,10,5,0.34), 0 7px 16px 0 rgba(8,10,5,0.39)'
 
 type RecordRowContextMenuProps = {
   record: VaultRecord
@@ -184,7 +185,7 @@ export const RecordRowContextMenu = ({
   if (!isOpen || typeof document === 'undefined') return null
 
   const iconPrimary = theme.colors.colorTextPrimary
-  const iconDestructive = theme.colors.colorSurfaceDestructiveElevated
+  const iconDestructive = theme.colors.colorTextDestructive
 
   const visibility = coords === null ? 'hidden' : 'visible'
   const top = coords?.top ?? position.y
@@ -224,7 +225,7 @@ export const RecordRowContextMenu = ({
           paddingInline: 4,
           zIndex: 1000,
           boxSizing: 'border-box',
-          boxShadow: MENU_BOX_SHADOW
+          boxShadow: rawTokens.shadowMenu
         }}
       >
         <NavbarListItem
