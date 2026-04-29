@@ -277,61 +277,57 @@ export const CreateOrEditCreditCardModalContentV2 = ({
             testID="createoredit-creditcard-v2-comment"
           />
 
-          {(customFieldsList as Array<{ id: string }>).length > 0 ? (
-            <MultiSlotInput
-              testID="createoredit-creditcard-v2-hiddenmessage-slot"
-              actions={
-                <Button
-                  variant="tertiary"
-                  size="small"
-                  type="button"
-                  iconBefore={<Add width={16} height={16} />}
-                  onClick={() => addCustomField({ type: 'note', note: '' })}
-                  data-testid="createoredit-creditcard-v2-add-hiddenmessage"
-                >
-                  {t`Add Another Message`}
-                </Button>
-              }
-            >
-              {(customFieldsList as Array<{ id: string }>).map(
-                (field, index) => {
-                  const fieldReg = registerCustomFieldItem('note', index)
-                  const canRemove =
-                    (customFieldsList as Array<{ id: string }>).length > 1
-                  return (
-                    <PasswordField
-                      key={field.id}
-                      label={t`Hidden Message`}
-                      placeholder={t`Enter Hidden Message`}
-                      value={fieldReg.value as string}
-                      onChange={(e) => fieldReg.onChange(e.target.value)}
-                      error={fieldReg.error || undefined}
-                      testID={`createoredit-creditcard-v2-hiddenmessage-${index}`}
-                      rightSlot={
-                        canRemove ? (
-                          <Button
-                            variant="tertiary"
-                            size="small"
-                            type="button"
-                            aria-label={t`Remove`}
-                            iconBefore={
-                              <TrashOutlined
-                                width={16}
-                                height={16}
-                                color={theme.colors.colorTextPrimary}
-                              />
-                            }
-                            onClick={() => removeCustomFieldItem(index)}
-                            data-testid={`createoredit-creditcard-v2-remove-hiddenmessage-${index}`}
+          <MultiSlotInput
+            testID="createoredit-creditcard-v2-hiddenmessage-slot"
+            actions={
+              <Button
+                variant="tertiary"
+                size="small"
+                type="button"
+                iconBefore={<Add width={16} height={16} />}
+                onClick={() => addCustomField({ type: 'note', note: '' })}
+                data-testid="createoredit-creditcard-v2-add-comment"
+              >
+                {t`Add Another Message`}
+              </Button>
+            }
+          >
+            {(customFieldsList as Array<{ id: string }>).map((field, index) => {
+              const fieldReg = registerCustomFieldItem('note', index)
+              const canRemove =
+                (customFieldsList as Array<{ id: string }>).length > 1
+              return (
+                <PasswordField
+                  key={field.id}
+                  label={t`Hidden Message`}
+                  placeholder={t`Enter Hidden Message`}
+                  value={fieldReg.value as string}
+                  onChange={(e) => fieldReg.onChange(e.target.value)}
+                  error={fieldReg.error || undefined}
+                  testID={`createoredit-creditcard-v2-hiddenmessage-${index}`}
+                  rightSlot={
+                    canRemove ? (
+                      <Button
+                        variant="tertiary"
+                        size="small"
+                        type="button"
+                        aria-label={t`Remove`}
+                        iconBefore={
+                          <TrashOutlined
+                            width={16}
+                            height={16}
+                            color={theme.colors.colorTextPrimary}
                           />
-                        ) : undefined
-                      }
-                    />
-                  )
-                }
-              )}
-            </MultiSlotInput>
-          ) : null}
+                        }
+                        onClick={() => removeCustomFieldItem(index)}
+                        data-testid={`createoredit-creditcard-v2-remove-hiddenmessage-${index}`}
+                      />
+                    ) : undefined
+                  }
+                />
+              )
+            })}
+          </MultiSlotInput>
         </div>
       </Form>
     </Dialog>

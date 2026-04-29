@@ -469,23 +469,7 @@ export const CreateOrEditLoginModalContentV2 = ({
             {t`Additional`}
           </Text>
 
-          <MultiSlotInput
-            testID="createoredit-login-v2-comment-slot"
-            actions={
-              <Button
-                variant="tertiary"
-                size="small"
-                type="button"
-                iconBefore={<Add width={16} height={16} />}
-                onClick={() =>
-                  addCustomField({ type: 'note', name: 'note', note: '' })
-                }
-                data-testid="createoredit-login-v2-add-comment"
-              >
-                {t`Add Another Comment`}
-              </Button>
-            }
-          >
+          <MultiSlotInput testID="createoredit-login-v2-comment-slot">
             <InputField
               label={t`Comment`}
               placeholder={t`Enter Comment`}
@@ -496,9 +480,24 @@ export const CreateOrEditLoginModalContentV2 = ({
             />
           </MultiSlotInput>
 
-          {!isAuthenticatorMode &&
-          (customFieldsList as Array<{ id: string }>).length > 0 ? (
-            <MultiSlotInput testID="createoredit-login-v2-hiddenmessages-slot">
+          {!isAuthenticatorMode ? (
+            <MultiSlotInput
+              testID="createoredit-login-v2-hiddenmessages-slot"
+              actions={
+                <Button
+                  variant="tertiary"
+                  size="small"
+                  type="button"
+                  iconBefore={<Add width={16} height={16} />}
+                  onClick={() =>
+                    addCustomField({ type: 'note', name: 'note', note: '' })
+                  }
+                  data-testid="createoredit-login-v2-add-comment"
+                >
+                  {t`Add Another Message`}
+                </Button>
+              }
+            >
               {(customFieldsList as Array<{ id: string }>).map(
                 (field, index) => {
                   const fieldReg = registerCustomFieldItem('note', index)
