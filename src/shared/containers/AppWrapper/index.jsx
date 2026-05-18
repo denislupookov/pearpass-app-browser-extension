@@ -10,7 +10,7 @@ import { messages } from '../../../locales/en/messages'
 import { PearpassVaultClient } from '../../../vaultClient'
 import { LoadingProvider } from '../../context/LoadingContext'
 import { RouterProvider } from '../../context/RouterContext'
-import { platformMessages } from '../../services/messageBridge'
+import { initCurrentDeviceName } from '../../utils/initCurrentDeviceName'
 import '../../../index.css'
 
 // const client = new PearpassVaultClient({
@@ -20,13 +20,8 @@ const client = new PearpassVaultClient({
   debugMode: false
 })
 
-;(async () => {
-  const platform = await platformMessages.getPlatformInfo()
-  const currentDeviceName = platform
-    ? `${platform.os} ${platform.arch}`.trim()
-    : undefined
-  setPearpassVaultClient(client, { currentDeviceName })
-})()
+setPearpassVaultClient(client)
+initCurrentDeviceName()
 
 i18n.load('en', messages)
 i18n.activate('en')
